@@ -9,9 +9,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-
 @Composable
-fun HomeScreen(onDeepstop: () -> Unit) {
+fun HomeScreen(
+    onDeepstop: () -> Unit,
+    onRockBottom: () -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.Center,
@@ -19,11 +21,17 @@ fun HomeScreen(onDeepstop: () -> Unit) {
     ) {
         Text("Peer's TEC-Tools", style = MaterialTheme.typography.headlineLarge)
         Spacer(Modifier.height(50.dp))
+
         OutlinedButton(
             onClick = onDeepstop,
             modifier = Modifier.width(240.dp).height(56.dp)
         ) { Text("Deepstop Calculator") }
 
-        //Test Push
+        Spacer(Modifier.height(16.dp))
+
+        OutlinedButton(
+            onClick = onRockBottom,
+            modifier = Modifier.width(240.dp).height(56.dp)
+        ) { Text("RockBottom Calculator") }
     }
 }

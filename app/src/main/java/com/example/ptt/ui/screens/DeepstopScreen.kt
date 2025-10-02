@@ -37,7 +37,7 @@ fun DeepstopScreen(onBack: () -> Unit, vm: DeepstopViewModel = viewModel()) {
         Spacer(Modifier.height(16.dp))
 
 
-        Text("Deepstop-Calculator", style = MaterialTheme.typography.headlineMedium)
+        Text("Deepstop Calculator", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(20.dp))
 
 
