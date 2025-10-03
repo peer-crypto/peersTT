@@ -30,9 +30,9 @@ object RockBottomCalculator {
         require(inputs.bottomDepthM >= inputs.switchDepthM) {
             "Bottom depth must be >= switch depth"
         }
-        val teamSac = inputs.sacPerDiverLpm * inputs.divers
+        val teamSac = inputs.sacPerDiverLpm * inputs.divers  // Gesamt-SAC aller Taucher
 
-        // Stops sortieren & auf gültigen Bereich trimmen
+        // Stops sortieren, obwohl bei Eingabe bereits richtige Reihenfolge erzwungen wird. Sicher ist sicher
         val stops = inputs.stopsBeforeSwitch
             .filter { it.depthM in inputs.switchDepthM..inputs.bottomDepthM }
             .sortedByDescending { it.depthM }

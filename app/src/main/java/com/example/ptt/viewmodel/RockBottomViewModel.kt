@@ -17,10 +17,6 @@ class RockBottomViewModel : ViewModel() {
     // erste Switch-Tiefe (Meter)
     var switchDepthM by mutableStateOf("21")
 
-    // Abgeleitet: Team-SAC
-    val sacTeamLpm: Int
-        get() = (sacPerDiver.toIntOrNull() ?: 0) * 2
-
     // Ein einzelner Deko-Stop (Tiefe + Dauer)
     data class DecoStop(var depthM: String = "", var minutes: String = "")
 
@@ -44,21 +40,21 @@ class RockBottomViewModel : ViewModel() {
         // Sicherheitsnetz (sollte durch canAddAnotherStop() schon gewährleistet sein)
         if (defaultDepth <= sw || defaultDepth > bottom) return
 
-        decoStops.add(DecoStop(depthM = defaultDepth.toString(), minutes = "2"))
+        decoStops.add(DecoStop(depthM = defaultDepth.toString(), minutes = "1"))
     }
     // Helper: Stops aufsteigend
     private fun bottomDepth(): Int? = depthM.toIntOrNull()
     private fun switchDepth(): Int? = switchDepthM.toIntOrNull()
 
 
-    // Hälfte der Bottom-Tiefe; wenn nicht %3==0, abwärts in 3er-Schritten
+    // Erster Stop Hälfte der Bottom-Tiefe, erste größere Zahl die durch 3 teilbar ist
 
     private fun firstStopDepth(bottom: Int): Int {
         val half = bottom / 2
-        return if (half % 3 == 0) half else half - (half % 3)
+        return if (half % 3 == 0) half else half + (half % 3)
     }
 
-    // Nächster Stop nach dem letzten: 3 m flacher, auf 3er-Raster ausrichten
+    // Nächster 3 m flacher, auf 3er-Raster ausrichten
     private fun nextStopAfter(lastDepth: Int): Int {
         val base = lastDepth - 3
         return base - (base % 3)
@@ -66,7 +62,7 @@ class RockBottomViewModel : ViewModel() {
 
     // weiterer Stop möglich?
     fun canAddAnotherStop(): Boolean {
-        if (decoStops.size >= 7) return false
+        if (decoStops.size >= 8) return false
         val bottom = bottomDepth() ?: return false
         val sw = switchDepth() ?: return false
 
@@ -77,8 +73,7 @@ class RockBottomViewModel : ViewModel() {
             nextStopAfter(last)
         }
 
-        // Regel: Nur wenn der nächste Stop **strikt tiefer** als Switch ist (also > sw)
-        // und nicht tiefer als Bottom.
+        // Nur falls nächster Stop tiefer als Switch-Tiefe
         return candidate in (sw + 1)..bottom
     }
 
@@ -88,7 +83,7 @@ class RockBottomViewModel : ViewModel() {
         return depth in sw..bottom
     }
 
-    /** Gültig, wenn: nicht leer, Zahl, im Bereich, und monotone Reihenfolge (tief -> flach). */
+    //Gültig, wenn: nicht leer, Zahl, im Bereich, und monotone Reihenfolge (tief -> flach).
     fun isStopDepthValidAt(index: Int): Boolean {
         if (index !in decoStops.indices) return false
         val self = decoStops[index].depthM.toIntOrNull() ?: return false
@@ -101,26 +96,15 @@ class RockBottomViewModel : ViewModel() {
         return okPrev && okNext
     }
 
-    /** Minuten sind gültig, wenn: nicht leer, Zahl (>=0). */
+    // Minuten sind gültig, wenn: nicht leer, Zahl (>=0).
     fun isStopMinutesValidAt(index: Int): Boolean {
         if (index !in decoStops.indices) return false
         return decoStops[index].minutes.toIntOrNull() != null
     }
 
-    /** Mindestens ein Stop ist ungültig? → true */
+    //Mindestens ein Stop ist ungültig? → true
     val hasInvalidStops: Boolean
         get() = decoStops.indices.any { !isStopDepthValidAt(it) || !isStopMinutesValidAt(it) }
-
-
-    private fun isMonotonicAt(index: Int, newDepth: Int): Boolean {
-        // Tiefe muss <= vorheriger Stop und >= nächster Stop sein
-        // (Reihenfolge: tief -> flach)
-        val prev = if (index > 0) decoStops[index - 1].depthM.toIntOrNull() else null
-        val next = if (index < decoStops.lastIndex) decoStops[index + 1].depthM.toIntOrNull() else null
-        val okPrev = prev?.let { newDepth <= it } ?: true
-        val okNext = next?.let { newDepth >= it } ?: true
-        return okPrev && okNext
-    }
 
     fun removeDecoStop(index: Int) {
         if (index in decoStops.indices) decoStops.removeAt(index)
