@@ -47,11 +47,11 @@ class RockBottomViewModel : ViewModel() {
     private fun switchDepth(): Int? = switchDepthM.toIntOrNull()
 
 
-    // Erster Stop Hälfte der Bottom-Tiefe, erste größere Zahl die durch 3 teilbar ist
+    // Erster Stop Hälfte der Bottom-Tiefe, bzw. deren erste größere Zahl die durch 3 teilbar ist
 
     private fun firstStopDepth(bottom: Int): Int {
         val half = bottom / 2
-        return if (half % 3 == 0) half else half + (half % 3)
+        return if (half % 3 == 0) half else half - (half % 3)
     }
 
     // Nächster 3 m flacher, auf 3er-Raster ausrichten
@@ -125,8 +125,6 @@ class RockBottomViewModel : ViewModel() {
             decoStops[index] = decoStops[index].copy(minutes = value)
         }
     }
-
-
 
     // Ergebniszustand für die UI
     var calcGasL by mutableStateOf<Int?>(null)
