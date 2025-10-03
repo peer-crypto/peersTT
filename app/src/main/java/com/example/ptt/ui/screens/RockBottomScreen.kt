@@ -20,6 +20,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ptt.viewmodel.RockBottomViewModel
 
 @Composable
+
 fun RockBottomScreen(
     onBack: () -> Unit,
     onShowResult: () -> Unit,
@@ -88,7 +89,7 @@ fun RockBottomScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                "Depth (m)",
+                "Bottom Depth (m)",
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.width(120.dp)
             )
@@ -119,7 +120,7 @@ fun RockBottomScreen(
         Spacer(Modifier.height(15.dp))
 
         // Deco stops
-        Text("Decostops before switch", style = MaterialTheme.typography.labelLarge)
+        Text("Decostops before switch (ascending):", style = MaterialTheme.typography.labelLarge)
         Spacer(Modifier.height(8.dp))
 
         LazyColumn(
@@ -129,6 +130,10 @@ fun RockBottomScreen(
                 .weight(1f, fill = false)
         ) {
             itemsIndexed(vm.decoStops) { index, stop ->
+
+                val depthInvalid = !vm.isStopDepthValidAt(index)
+                val minutesInvalid = !vm.isStopMinutesValidAt(index)
+
                 Row(
                     verticalAlignment = Alignment.Top,
                     horizontalArrangement = Arrangement.Center,   // Inhalte mittig ausrichten
@@ -142,7 +147,10 @@ fun RockBottomScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.width(100.dp)
                     ) {
-                        Text("Depth (m)", style = MaterialTheme.typography.labelSmall)
+                        Text("Depth (m)",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (depthInvalid) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                        )
                         CompactNumberField(
                             value = stop.depthM,
                             onValueChange = { vm.updateDecoStopDepth(index, it) }
@@ -156,7 +164,10 @@ fun RockBottomScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.width(100.dp)
                     ) {
-                        Text("Minutes", style = MaterialTheme.typography.labelSmall)
+                        Text("Minutes",
+                            style = MaterialTheme.typography.labelSmall,
+                                    color = if (minutesInvalid) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                        )
                         CompactNumberField(
                             value = stop.minutes,
                             onValueChange = { vm.updateDecoStopMinutes(index, it) }
@@ -173,11 +184,9 @@ fun RockBottomScreen(
 
         Spacer(Modifier.height(8.dp))
 
-// Add-Stop Button nur anzeigen, wenn < 6 Stops
-        if (vm.decoStops.size < 7) {
-            Button(onClick = { vm.addDecoStop() }) {
-                Text("Add stop")
-            }
+// Add-Stop Button nur anzeigen, wenn < 7 Stops
+        if (vm.canAddAnotherStop()) {
+            Button(onClick = { vm.addDecoStop() }) { Text("Add stop") }
         }
 
         Spacer(Modifier.height(16.dp))
@@ -186,15 +195,14 @@ fun RockBottomScreen(
         Button(
             onClick = {
                 vm.calculateRockBottom()
-                // Nur navigieren, wenn ein Ergebnis vorhanden ist
-                if (vm.calcGasL != null && vm.calcBar != null) {
-                    onShowResult()
-                }
+                if (vm.calcGasL != null && vm.calcBar != null) onShowResult()
             },
+            enabled = !vm.hasInvalidStops,
             modifier = Modifier.fillMaxWidth()
         ) { Text("Calculate") }
-    }
 
 
+
     }
+}
 

@@ -16,7 +16,7 @@ import com.example.ptt.navigation.Routes
 @Composable
 fun RockBottomResultScreen(
     onBack: () -> Unit,
-    nav: NavHostController, // ⬅️ NavController reinreichen
+    nav: NavHostController, // NavController reinreichen
 ) {
 
     // shared VM vom RockBottom-Backstack holen

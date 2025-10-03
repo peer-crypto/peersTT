@@ -28,36 +28,121 @@ class RockBottomViewModel : ViewModel() {
     val decoStops = androidx.compose.runtime.mutableStateListOf<DecoStop>()
 
     // Helper: Stop hinzufügen/entfernen/ändern
-    fun addDecoStop(defaultDepth: String = "30", defaultMin: String = "2") {
-        if (decoStops.size < 7) {   // ⬅️ Limit auf 6 Stops
-        decoStops.add(DecoStop(defaultDepth, defaultMin))
+    fun addDecoStop() {
+        if (!canAddAnotherStop()) return
+
+        val bottom = bottomDepth() ?: return
+        val sw = switchDepth() ?: return
+
+        val defaultDepth = if (decoStops.isEmpty()) {
+            firstStopDepth(bottom)
+        } else {
+            val last = decoStops.last().depthM.toIntOrNull() ?: bottom
+            nextStopAfter(last)
+        }
+
+        // Sicherheitsnetz (sollte durch canAddAnotherStop() schon gewährleistet sein)
+        if (defaultDepth <= sw || defaultDepth > bottom) return
+
+        decoStops.add(DecoStop(depthM = defaultDepth.toString(), minutes = "2"))
     }
+    // Helper: Stops aufsteigend
+    private fun bottomDepth(): Int? = depthM.toIntOrNull()
+    private fun switchDepth(): Int? = switchDepthM.toIntOrNull()
+
+
+    // Hälfte der Bottom-Tiefe; wenn nicht %3==0, abwärts in 3er-Schritten
+
+    private fun firstStopDepth(bottom: Int): Int {
+        val half = bottom / 2
+        return if (half % 3 == 0) half else half - (half % 3)
+    }
+
+    // Nächster Stop nach dem letzten: 3 m flacher, auf 3er-Raster ausrichten
+    private fun nextStopAfter(lastDepth: Int): Int {
+        val base = lastDepth - 3
+        return base - (base % 3)
+    }
+
+    // weiterer Stop möglich?
+    fun canAddAnotherStop(): Boolean {
+        if (decoStops.size >= 7) return false
+        val bottom = bottomDepth() ?: return false
+        val sw = switchDepth() ?: return false
+
+        val candidate = if (decoStops.isEmpty()) {
+            firstStopDepth(bottom)
+        } else {
+            val last = decoStops.last().depthM.toIntOrNull() ?: return false
+            nextStopAfter(last)
+        }
+
+        // Regel: Nur wenn der nächste Stop **strikt tiefer** als Switch ist (also > sw)
+        // und nicht tiefer als Bottom.
+        return candidate in (sw + 1)..bottom
+    }
+
+    private fun isDepthInRange(depth: Int): Boolean {
+        val bottom = bottomDepth() ?: return false
+        val sw = switchDepth() ?: return false
+        return depth in sw..bottom
+    }
+
+    /** Gültig, wenn: nicht leer, Zahl, im Bereich, und monotone Reihenfolge (tief -> flach). */
+    fun isStopDepthValidAt(index: Int): Boolean {
+        if (index !in decoStops.indices) return false
+        val self = decoStops[index].depthM.toIntOrNull() ?: return false
+        if (!isDepthInRange(self)) return false
+
+        val prev = if (index > 0) decoStops[index - 1].depthM.toIntOrNull() else null
+        val next = if (index < decoStops.lastIndex) decoStops[index + 1].depthM.toIntOrNull() else null
+        val okPrev = prev?.let { self <= it } ?: true
+        val okNext = next?.let { self >= it } ?: true
+        return okPrev && okNext
+    }
+
+    /** Minuten sind gültig, wenn: nicht leer, Zahl (>=0). */
+    fun isStopMinutesValidAt(index: Int): Boolean {
+        if (index !in decoStops.indices) return false
+        return decoStops[index].minutes.toIntOrNull() != null
+    }
+
+    /** Mindestens ein Stop ist ungültig? → true */
+    val hasInvalidStops: Boolean
+        get() = decoStops.indices.any { !isStopDepthValidAt(it) || !isStopMinutesValidAt(it) }
+
+
+    private fun isMonotonicAt(index: Int, newDepth: Int): Boolean {
+        // Tiefe muss <= vorheriger Stop und >= nächster Stop sein
+        // (Reihenfolge: tief -> flach)
+        val prev = if (index > 0) decoStops[index - 1].depthM.toIntOrNull() else null
+        val next = if (index < decoStops.lastIndex) decoStops[index + 1].depthM.toIntOrNull() else null
+        val okPrev = prev?.let { newDepth <= it } ?: true
+        val okNext = next?.let { newDepth >= it } ?: true
+        return okPrev && okNext
     }
 
     fun removeDecoStop(index: Int) {
         if (index in decoStops.indices) decoStops.removeAt(index)
     }
 
+    // Eingaben: immer übernehmen (wenn nur Ziffern/leer)
     fun updateDecoStopDepth(index: Int, value: String) {
-        if (index in decoStops.indices && (value.isEmpty() || value.all { it.isDigit() })) {
+        if (index !in decoStops.indices) return
+        if (value.isEmpty() || value.all(Char::isDigit)) {
             decoStops[index] = decoStops[index].copy(depthM = value)
         }
     }
 
+
     fun updateDecoStopMinutes(index: Int, value: String) {
-        if (index in decoStops.indices && (value.isEmpty() || value.all { it.isDigit() })) {
+        if (index !in decoStops.indices) return
+        if (value.isEmpty() || value.all(Char::isDigit)) {
             decoStops[index] = decoStops[index].copy(minutes = value)
         }
     }
 
-    // Validierung (nur „bis zum ersten Switch“):
-    fun isStopInRange(depthStr: String): Boolean {
-        val bottom = depthM.toIntOrNull() ?: return false
-        val switch = switchDepthM.toIntOrNull() ?: return false
-        val d = depthStr.toIntOrNull() ?: return false
-        // Stop-Tiefe liegt zwischen Switch-Tiefe und Bottom (inklusive)
-        return d in switch..bottom
-    }
+
 
     // Ergebniszustand für die UI
     var calcGasL by mutableStateOf<Int?>(null)
@@ -68,6 +153,11 @@ class RockBottomViewModel : ViewModel() {
         private set
 
     fun calculateRockBottom() {
+
+        if (hasInvalidStops) {
+            calcGasL = null; calcBar = null; calcSegments = emptyList()
+            return
+        }
         // Parsing & einfache Validierung
         val sac = sacPerDiver.toIntOrNull()
         val cyl = cylinderL.toIntOrNull()
