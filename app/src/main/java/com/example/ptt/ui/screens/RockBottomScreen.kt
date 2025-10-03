@@ -1,12 +1,11 @@
 package com.example.ptt.ui.screens
 
-
+import CompactNumberField
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -19,16 +18,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ptt.viewmodel.RockBottomViewModel
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
 
 @Composable
-fun RockBottomScreen(onBack: () -> Unit, vm: RockBottomViewModel = viewModel()) {
+fun RockBottomScreen(
+    onBack: () -> Unit,
+    onShowResult: () -> Unit,
+    vm: RockBottomViewModel = viewModel()) {
+
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Header
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -41,103 +45,156 @@ fun RockBottomScreen(onBack: () -> Unit, vm: RockBottomViewModel = viewModel()) 
 
         Spacer(Modifier.height(16.dp))
 
-        // SAC pro Taucher (inkl. Stressfaktor, vom Nutzer bestimmt)
-        Text("SAC per diver (l/min @ 1 ata)", style = MaterialTheme.typography.labelLarge)
-        OutlinedTextField(
-            value = vm.sacPerDiver,
-            onValueChange = { input ->
-                // Nur Zahlen oder leer erlauben
-                if (input.isEmpty() || input.all { it.isDigit() }) vm.sacPerDiver = input
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.width(240.dp)
-        )
+        // SAC per diver
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "SAC per diver (L/min)",
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.width(120.dp)
+            )  // feste Breite für Label
+            CompactNumberField(
+                value = vm.sacPerDiver,
+                onValueChange = { vm.sacPerDiver = it }
+            )
+        }
 
-        Spacer(Modifier.height(5.dp))
 
-        Text("Team-SAC: ${vm.sacTeamLpm} l/min", style = MaterialTheme.typography.bodyMedium)
-
-        // Cylinder size (L)
         Spacer(Modifier.height(12.dp))
-        Text("Cylinder size (L)", style = MaterialTheme.typography.labelLarge)
-        OutlinedTextField(
-            value = vm.cylinderL,
-            onValueChange = { input ->
-                if (input.isEmpty() || input.all { it.isDigit() }) vm.cylinderL = input
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.width(240.dp)
-        )
 
-// Depth (m)
-        Spacer(Modifier.height(12.dp))
-        Text("Depth (m)", style = MaterialTheme.typography.labelLarge)
-        OutlinedTextField(
-            value = vm.depthM,
-            onValueChange = { input ->
-                if (input.isEmpty() || input.all { it.isDigit() }) vm.depthM = input
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.width(240.dp)
-        )
+        // Cylinder size
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "Cylinder (L)",
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.width(120.dp)
+            )
+            CompactNumberField(
+                value = vm.cylinderL,
+                onValueChange = { vm.cylinderL = it }
+            )
+        }
 
-// Switch depth (m)
         Spacer(Modifier.height(12.dp))
-        Text("Gasswitch depth (m)", style = MaterialTheme.typography.labelLarge)
-        OutlinedTextField(
-            value = vm.switchDepthM,
-            onValueChange = { input ->
-                if (input.isEmpty() || input.all { it.isDigit() }) vm.switchDepthM = input
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.width(240.dp)
-        )
+
+        // Bottom depth
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "Depth (m)",
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.width(120.dp)
+            )
+            CompactNumberField(
+                value = vm.depthM,
+                onValueChange = { vm.depthM = it }
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        // Switch depth
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "Switch depth (m)",
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.width(120.dp)
+            )
+            CompactNumberField(
+                value = vm.switchDepthM,
+                onValueChange = { vm.switchDepthM = it }
+            )
+        }
+
+        Spacer(Modifier.height(15.dp))
+
+        // Deco stops
         Text("Decostops before switch", style = MaterialTheme.typography.labelLarge)
         Spacer(Modifier.height(8.dp))
 
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f, fill = false)
         ) {
             itemsIndexed(vm.decoStops) { index, stop ->
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.Center,   // Inhalte mittig ausrichten
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    // Depth
-                    OutlinedTextField(
-                        value = stop.depthM,
-                        onValueChange = { vm.updateDecoStopDepth(index, it) },
-                        label = { Text("Depth (m)") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        isError = stop.depthM.isNotEmpty() && !vm.isStopInRange(stop.depthM),
-                        modifier = Modifier.width(140.dp)
-                    )
-                    // Minutes
-                    OutlinedTextField(
-                        value = stop.minutes,
-                        onValueChange = { vm.updateDecoStopMinutes(index, it) },
-                        label = { Text("Minutes") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.width(120.dp)
-                    )
-                    // Remove
-                    IconButton(
-                        onClick = { vm.removeDecoStop(index) }
-                    ) { Icon(Icons.Default.Delete, contentDescription = "Remove stop") }
+
+                    Spacer(Modifier.width(75.dp))
+
+                    // Depth column
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.width(100.dp)
+                    ) {
+                        Text("Depth (m)", style = MaterialTheme.typography.labelSmall)
+                        CompactNumberField(
+                            value = stop.depthM,
+                            onValueChange = { vm.updateDecoStopDepth(index, it) }
+                        )
+                    }
+
+                    Spacer(Modifier.width(5.dp)) // Abstand zwischen Depth und Minutes
+
+                    // Minutes column
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.width(100.dp)
+                    ) {
+                        Text("Minutes", style = MaterialTheme.typography.labelSmall)
+                        CompactNumberField(
+                            value = stop.minutes,
+                            onValueChange = { vm.updateDecoStopMinutes(index, it) }
+                        )
+                    }
+
+                    Spacer(Modifier.width(12.dp)) // Abstand zum Delete-Button
+                    IconButton(onClick = { vm.removeDecoStop(index) }) {
+                        Icon(Icons.Default.Delete, contentDescription = "Remove stop")
+                    }
                 }
             }
         }
 
         Spacer(Modifier.height(8.dp))
-        Button(onClick = { vm.addDecoStop() }) { Text("Add stop") }
+
+// Add-Stop Button nur anzeigen, wenn < 6 Stops
+        if (vm.decoStops.size < 7) {
+            Button(onClick = { vm.addDecoStop() }) {
+                Text("Add stop")
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+// Calculate Button
+        Button(
+            onClick = {
+                vm.calculateRockBottom()
+                // Nur navigieren, wenn ein Ergebnis vorhanden ist
+                if (vm.calcGasL != null && vm.calcBar != null) {
+                    onShowResult()
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) { Text("Calculate") }
+    }
+
 
     }
-}
+

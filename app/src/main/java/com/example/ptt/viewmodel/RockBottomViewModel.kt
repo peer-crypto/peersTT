@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.ptt.domain.RockBottomCalculator
 
 class RockBottomViewModel : ViewModel() {
     // SAC pro Taucher @1 ATA (inkl. ggf. Stressfaktor, vom Nutzer selbst gewählt)
@@ -28,7 +29,9 @@ class RockBottomViewModel : ViewModel() {
 
     // Helper: Stop hinzufügen/entfernen/ändern
     fun addDecoStop(defaultDepth: String = "30", defaultMin: String = "2") {
+        if (decoStops.size < 7) {   // ⬅️ Limit auf 6 Stops
         decoStops.add(DecoStop(defaultDepth, defaultMin))
+    }
     }
 
     fun removeDecoStop(index: Int) {
@@ -56,12 +59,47 @@ class RockBottomViewModel : ViewModel() {
         return d in switch..bottom
     }
 
-    // Abgeleitete, bereinigte Liste (für spätere Berechnung)
-    val decoStopsParsed: List<Pair<Int, Int>>
-        get() = decoStops.mapNotNull { s ->
-            val d = s.depthM.toIntOrNull()
-            val m = s.minutes.toIntOrNull()
-            if (d != null && m != null && isStopInRange(s.depthM)) d to m else null
+    // Ergebniszustand für die UI
+    var calcGasL by mutableStateOf<Int?>(null)
+        private set
+    var calcBar by mutableStateOf<Int?>(null)
+        private set
+    var calcSegments by mutableStateOf<List<RockBottomCalculator.Segment>>(emptyList())
+        private set
+
+    fun calculateRockBottom() {
+        // Parsing & einfache Validierung
+        val sac = sacPerDiver.toIntOrNull()
+        val cyl = cylinderL.toIntOrNull()
+        val bottom = depthM.toIntOrNull()
+        val switch = switchDepthM.toIntOrNull()
+
+        if (sac == null || cyl == null || bottom == null || switch == null) {
+            calcGasL = null; calcBar = null; calcSegments = emptyList(); return
+        }
+        if (bottom < switch) {
+            calcGasL = null; calcBar = null; calcSegments = emptyList(); return
         }
 
+        val stops = decoStops.mapNotNull {
+            val d = it.depthM.toIntOrNull()
+            val m = it.minutes.toIntOrNull()
+            if (d != null && m != null) RockBottomCalculator.Stop(d, m) else null
+        }
+
+        val res = RockBottomCalculator.computeUntilSwitch(
+            RockBottomCalculator.Inputs(
+                bottomDepthM = bottom,
+                switchDepthM = switch,
+                sacPerDiverLpm = sac,
+                cylinderVolumeL = cyl,
+                stopsBeforeSwitch = stops
+            )
+        )
+        calcGasL = res.totalGasL
+        calcBar = res.requiredBar
+        calcSegments = res.segments
+    }
 }
+
+
