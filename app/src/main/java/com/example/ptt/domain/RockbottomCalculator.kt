@@ -1,8 +1,9 @@
 package com.example.ptt.domain
 
+import kotlin.collections.plusAssign
 import kotlin.math.ceil
 
-object RockBottomCalculator {
+object RockbottomCalculator {
 
     // ---- Eingabe- & Ergebnis-Typen ----
 
@@ -50,21 +51,21 @@ object RockBottomCalculator {
 
 
         val legs = mutableListOf<Leg>()
-        var current = bottomM
+        var currentDepth = bottomM
 
         for (s in stops) {
-            if (s.depthM < current) {
-                legs += Leg.Move(fromM = current, toM = s.depthM)
+            if (s.depthM < currentDepth) {
+                legs += Leg.Move(fromM = currentDepth, toM = s.depthM)
             }
             if (s.minutes > 0) {
                 legs += Leg.Hold(atM = s.depthM, minutes = s.minutes)
             }
-            current = s.depthM
+            currentDepth = s.depthM
         }
 
         // letzter Aufstieg bis zur Switch-Tiefe
-        if (switchM < current) {
-            legs += Leg.Move(fromM = current, toM = switchM)
+        if (switchM < currentDepth) {
+            legs += Leg.Move(fromM = currentDepth, toM = switchM)
         }
 
         return legs
@@ -81,8 +82,8 @@ object RockBottomCalculator {
         val segs = mutableListOf<Segment>()
         var total = 0.0
 
-        fun add(label: String, gas: Double) {
-            val g = ceil(gas).toInt()           // konservativ je Segment
+        fun addSeg(label: String, gas: Double) {
+            val g = ceil(gas).toInt()           // aufrunden
             if (g > 0) segs += Segment(label, g)
             total += gas                        // ungerundet summieren
         }
@@ -91,20 +92,23 @@ object RockBottomCalculator {
             when (leg) {
                 is Leg.Move -> {
                     val delta = (leg.fromM - leg.toM).toDouble()
-                    val timeMin = if (p.ascentRateMpm > 0) delta / p.ascentRateMpm else 0.0
+                    val timeMin = if (p.ascentRateMpm > 0) delta / p.ascentRateMpm else 0.0 // Sicherheitscheck bzgl. 0 Division
                     val avgM = (leg.fromM + leg.toM) / 2.0
                     val gas = p.teamSacLpm * ata(avgM) * timeMin
                     // Ausgabe je nach Move- Richtung anpassen
                     val direction = if (leg.toM < leg.fromM) "Ascent" else "Descent"
-                    add("$direction ${leg.fromM}→${leg.toM} m", gas)
+                    addSeg("$direction ${leg.fromM}→${leg.toM} m", gas)
                 }
 
                 is Leg.Hold -> {
                     val gas = p.teamSacLpm * ata(leg.atM.toDouble()) * leg.minutes
-                    add("Stop @ ${leg.atM} m (${leg.minutes} min)", gas)
+                    addSeg("Stop @ ${leg.atM} m (${leg.minutes} min)", gas)
                 }
             }
         }
+
+
+
 
         val totalL = ceil(total).toInt()                              // am Ende einmal runden
         val bar = ceil(totalL / p.cylinderL.toDouble()).toInt()
@@ -116,7 +120,8 @@ object RockBottomCalculator {
         )
     }
 
-    // ---- Öffentliche API (gleich geblieben) ----
+
+    // ---- Öffentliche API ----
     fun computeUntilSwitch(inputs: Inputs): Result {
         val legs = buildLegs(
             bottomM = inputs.bottomDepthM,
@@ -131,7 +136,7 @@ object RockBottomCalculator {
         return evaluate(legs, params)
     }
 
-    // (Optional) öffentlich machen, falls du die reine Herleitung zeigen willst:
+    // (Optional) öffentlich machen,  die reine Herleitung :
     fun buildLegsPublic(inputs: Inputs): List<Leg> =
         buildLegs(inputs.bottomDepthM, inputs.switchDepthM, inputs.stopsBeforeSwitch)
 }

@@ -17,14 +17,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.ptt.viewmodel.RockBottomViewModel
+import com.example.ptt.viewmodel.RockbottomViewModel
 
 @Composable
 
 fun RockBottomScreen(
     onBack: () -> Unit,
     onShowResult: () -> Unit,
-    vm: RockBottomViewModel = viewModel()) {
+    vm: RockbottomViewModel = viewModel()) {
 
     Column(
         modifier = Modifier

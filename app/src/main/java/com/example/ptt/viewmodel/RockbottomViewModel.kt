@@ -4,9 +4,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.ptt.domain.RockBottomCalculator
+import com.example.ptt.domain.RockbottomCalculator
 
-class RockBottomViewModel : ViewModel() {
+class RockbottomViewModel : ViewModel() {
     // SAC pro Taucher @1 ATA (inkl. ggf. Stressfaktor, vom Nutzer selbst gewählt)
     var sacPerDiver by mutableStateOf("30") // als String für TextField
 
@@ -131,7 +131,7 @@ class RockBottomViewModel : ViewModel() {
         private set
     var calcBar by mutableStateOf<Int?>(null)
         private set
-    var calcSegments by mutableStateOf<List<RockBottomCalculator.Segment>>(emptyList())
+    var calcSegments by mutableStateOf<List<RockbottomCalculator.Segment>>(emptyList())
         private set
 
     fun calculateRockBottom() {
@@ -156,11 +156,11 @@ class RockBottomViewModel : ViewModel() {
         val stops = decoStops.mapNotNull {
             val d = it.depthM.toIntOrNull()
             val m = it.minutes.toIntOrNull()
-            if (d != null && m != null) RockBottomCalculator.Stop(d, m) else null
+            if (d != null && m != null) RockbottomCalculator.Stop(d, m) else null
         }
 
-        val res = RockBottomCalculator.computeUntilSwitch(
-            RockBottomCalculator.Inputs(
+        val res = RockbottomCalculator.computeUntilSwitch(
+            RockbottomCalculator.Inputs(
                 bottomDepthM = bottom,
                 switchDepthM = switch,
                 sacPerDiverLpm = sac,
