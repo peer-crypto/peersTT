@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun HomeScreen(
     onDeepstop: () -> Unit,
-    onRockBottom: () -> Unit
+    onRockbottom: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -30,8 +30,8 @@ fun HomeScreen(
         Spacer(Modifier.height(16.dp))
 
         OutlinedButton(
-            onClick = onRockBottom,
+            onClick = onRockbottom,
             modifier = Modifier.width(240.dp).height(56.dp)
-        ) { Text("RockBottom Calculator") }
+        ) { Text("Rockbottom Calculator") }
     }
 }

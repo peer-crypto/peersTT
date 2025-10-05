@@ -21,7 +21,7 @@ import com.example.ptt.viewmodel.RockbottomViewModel
 
 @Composable
 
-fun RockBottomScreen(
+fun RockbottomScreen(
     onBack: () -> Unit,
     onShowResult: () -> Unit,
     vm: RockbottomViewModel = viewModel()) {
@@ -194,7 +194,7 @@ fun RockBottomScreen(
 // Calculate Button
         Button(
             onClick = {
-                vm.calculateRockBottom()
+                vm.calculateRockbottom()
                 if (vm.calcGasL != null && vm.calcBar != null) onShowResult()
             },
             enabled = !vm.hasInvalidStops,

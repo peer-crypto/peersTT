@@ -6,8 +6,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.ptt.ui.screens.DeepstopScreen
 import com.example.ptt.ui.screens.HomeScreen
-import com.example.ptt.ui.screens.RockBottomScreen
-import com.example.ptt.ui.screens.RockBottomResultScreen
+import com.example.ptt.ui.screens.RockbottomScreen
+import com.example.ptt.ui.screens.RockbottomResultScreen
 
 object Routes {
     const val HOME = "home"
@@ -24,19 +24,19 @@ fun AppNavGraph(nav: NavHostController) {
         composable(Routes.HOME) {
             HomeScreen(
                 onDeepstop = { nav.navigate(Routes.DEEPSTOP) },
-                onRockBottom = { nav.navigate(Routes.ROCKBOTTOM) }
+                onRockbottom = { nav.navigate(Routes.ROCKBOTTOM) }
             )
         }
         composable(Routes.DEEPSTOP) { DeepstopScreen(onBack = { nav.popBackStack() }) }
 
         composable(Routes.ROCKBOTTOM) {
-            RockBottomScreen(
+            RockbottomScreen(
                 onBack = { nav.popBackStack() },
                 onShowResult = { nav.navigate(Routes.ROCKBOTTOM_RESULT) }
             )
         }
         composable(Routes.ROCKBOTTOM_RESULT) {
-            RockBottomResultScreen(
+            RockbottomResultScreen(
                 onBack = { nav.popBackStack() },
                 nav = nav        )
         }

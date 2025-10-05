@@ -12,6 +12,7 @@ object RockbottomCalculator {
 
     // Variablen
     data class Inputs(
+        val delayM: Int = 0,  // Initialisierung mit 0
         val bottomDepthM: Int,
         val switchDepthM: Int,
         val sacPerDiverLpm: Int,    // pro Taucher @1 ATA (inkl. Stress)
@@ -42,7 +43,7 @@ object RockbottomCalculator {
         data class Hold(val atM: Int, val minutes: Int) : Leg   // Stopp (bei Tiefe)
     }
 
-    private fun buildLegs(delaym: Int, bottomM: Int, switchM: Int, rawStops: List<Stop>): List<Leg> {
+    private fun buildLegs(delayM: Int, bottomM: Int, switchM: Int, rawStops: List<Stop>): List<Leg> {
         require(bottomM >= switchM) { "Bottom depth must be >= switch depth" }
 
         // defensive: nur Stops im Korridor, tief → flach
@@ -54,92 +55,100 @@ object RockbottomCalculator {
         val legs = mutableListOf<Leg>()
         var currentDepth = bottomM
 
-        legs+=Leg.Hold(currentDepth , minutes=delaym) //Verzögerung bis Aufstieg hinzufügen
+        // optionaler Verzögerungs-Abschnitt vor dem Aufstieg
+        if (delayM > 0) {
+            legs += Leg.Hold(atM = currentDepth, minutes = delayM)
 
-        for (s in stops) {
-            if (s.depthM < currentDepth) {
-                legs += Leg.Move(fromM = currentDepth, toM = s.depthM)
-            }
-            if (s.minutes > 0) {
-                legs += Leg.Hold(atM = s.depthM, minutes = s.minutes)
-            }
-            currentDepth = s.depthM
-        }
-
-        // letzter Aufstieg bis zur Switch-Tiefe
-        if (switchM < currentDepth) {
-            legs += Leg.Move(fromM = currentDepth, toM = switchM)
-        }
-
-        return legs
-    }
-
-    // ---- Phase 2: Legs auswerten – Physik/Mathematik ----
-    private data class Params(
-        val teamSacLpm: Int,
-        val ascentRateMpm: Int,
-        val cylinderL: Int,
-    )
-
-    private fun evaluate(legs: List<Leg>, p: Params): Result {
-        val segs = mutableListOf<Segment>()
-        var total = 0.0
-
-        fun addSeg(label: String, gas: Double) {
-            val g = ceil(gas).toInt()           // aufrunden
-            if (g > 0) segs += Segment(label, g)
-            total += gas                        // ungerundet summieren
-        }
-
-        legs.forEach { leg ->
-            when (leg) {
-                is Leg.Move -> {
-                    val delta = (leg.fromM - leg.toM).toDouble()
-                    val ascentTime = if (p.ascentRateMpm > 0) delta / p.ascentRateMpm else 0.0 // Sicherheitscheck bzgl. 0 Division
-                    val avgM = (leg.fromM + leg.toM) / 2.0
-                    val gasConsumption = p.teamSacLpm * ata(avgM) * ascentTime
-                    // Ausgabe je nach Move- Richtung anpassen
-                    val direction = if (leg.toM < leg.fromM) "Ascent" else "Descent"
-                    addSeg("$direction ${leg.fromM}→${leg.toM} m", gasConsumption)
+            for (s in stops) {
+                if (s.depthM < currentDepth) {
+                    legs += Leg.Move(fromM = currentDepth, toM = s.depthM)
                 }
+                if (s.minutes > 0) {
+                    legs += Leg.Hold(atM = s.depthM, minutes = s.minutes)
+                }
+                currentDepth = s.depthM
+            }
 
-                is Leg.Hold -> {
-                    val gasConsumption = p.teamSacLpm * ata(leg.atM.toDouble()) * leg.minutes
-                    addSeg("Stop @ ${leg.atM} m (${leg.minutes} min)", gasConsumption)
+            // letzter Aufstieg bis zur Switch-Tiefe
+            if (switchM < currentDepth) {
+                legs += Leg.Move(fromM = currentDepth, toM = switchM)
+            }
+        }
+            return legs
+
+    }
+        // ---- Phase 2: Legs auswerten – Physik/Mathematik ----
+        private data class Params(
+            val teamSacLpm: Int,
+            val ascentRateMpm: Int,
+            val cylinderL: Int,
+        )
+
+        private fun evaluate(legs: List<Leg>, p: Params): Result {
+            val segs = mutableListOf<Segment>()
+            var total = 0.0
+
+            fun addSeg(label: String, gas: Double) {
+                val g = ceil(gas).toInt()           // aufrunden
+                if (g > 0) segs += Segment(label, g)
+                total += gas                        // ungerundet summieren
+            }
+
+            legs.forEach { leg ->
+                when (leg) {
+                    is Leg.Move -> {
+                        val delta = (leg.fromM - leg.toM).toDouble()
+                        val ascentTime =
+                            if (p.ascentRateMpm > 0) delta / p.ascentRateMpm else 0.0 // Sicherheitscheck bzgl. 0 Division
+                        val avgM = (leg.fromM + leg.toM) / 2.0
+                        val gasConsumption = p.teamSacLpm * ata(avgM) * ascentTime
+                        // Ausgabe je nach Move- Richtung anpassen
+                        val direction = if (leg.toM < leg.fromM) "Ascent" else "Descent"
+                        addSeg("$direction ${leg.fromM}→${leg.toM} m", gasConsumption)
+                    }
+
+                    is Leg.Hold -> {
+                        val gasConsumption = p.teamSacLpm * ata(leg.atM.toDouble()) * leg.minutes
+                        addSeg("Stop @ ${leg.atM} m (${leg.minutes} min)", gasConsumption)
+                    }
                 }
             }
+
+
+            val totalL = ceil(total).toInt()                              // am Ende einmal runden
+            val bar = ceil(totalL / p.cylinderL.toDouble()).toInt()
+
+            return Result(
+                totalGasL = totalL,
+                requiredBar = bar,
+                segments = segs
+            )
         }
 
 
-        val totalL = ceil(total).toInt()                              // am Ende einmal runden
-        val bar = ceil(totalL / p.cylinderL.toDouble()).toInt()
+        // ---- Öffentliche API ----
+        fun computeUntilSwitch(inputs: Inputs): Result {
+            val legs = buildLegs(
+                bottomM = inputs.bottomDepthM,
+                switchM = inputs.switchDepthM,
+                rawStops = inputs.stopsBeforeSwitch, // das ist die Stop-Liste
+                delayM = inputs.delayM
+            )
+            val params = Params(
+                teamSacLpm = inputs.sacPerDiverLpm * inputs.divers,
+                ascentRateMpm = inputs.ascentRateMpm,
+                cylinderL = inputs.cylinderVolumeL
+            )
 
-        return Result(
-            totalGasL = totalL,
-            requiredBar = bar,
-            segments = segs
-        )
+            return evaluate(legs, params)
+        }
+
+        // (Optional) öffentlich machen,  die reine Herleitung :
+        fun buildLegsPublic(inputs: Inputs): List<Leg> =
+            buildLegs(
+                inputs.delay_m,
+                inputs.bottomDepthM,
+                inputs.switchDepthM,
+                inputs.stopsBeforeSwitch
+            )
     }
-
-
-    // ---- Öffentliche API ----
-    fun computeUntilSwitch(inputs: Inputs): Result {
-        val legs = buildLegs(
-            bottomM = inputs.bottomDepthM,
-            switchM = inputs.switchDepthM,
-            rawStops = inputs.stopsBeforeSwitch, // das ist die Stop-Liste
-            delaym =inputs.delay_m
-        )
-        val params = Params(
-            teamSacLpm = inputs.sacPerDiverLpm * inputs.divers,
-            ascentRateMpm = inputs.ascentRateMpm,
-            cylinderL = inputs.cylinderVolumeL
-        )
-
-        return evaluate(legs, params)
-    }
-
-    // (Optional) öffentlich machen,  die reine Herleitung :
-    fun buildLegsPublic(inputs: Inputs): List<Leg> =
-        buildLegs(inputs.delay_m,inputs.bottomDepthM, inputs.switchDepthM, inputs.stopsBeforeSwitch)
-}

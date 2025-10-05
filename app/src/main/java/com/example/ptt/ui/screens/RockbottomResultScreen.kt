@@ -14,7 +14,7 @@ import com.example.ptt.navigation.Routes
 
 
 @Composable
-fun RockBottomResultScreen(
+fun RockbottomResultScreen(
     onBack: () -> Unit,
     nav: NavHostController, // NavController reinreichen
 ) {

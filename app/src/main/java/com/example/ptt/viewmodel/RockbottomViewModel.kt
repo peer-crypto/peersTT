@@ -14,6 +14,8 @@ class RockbottomViewModel : ViewModel() {
     var cylinderL by mutableStateOf("24")
     var depthM by mutableStateOf("50")
 
+    var delayM by mutableStateOf(2)     // Verzögerung vor Aufstieg Default-Wert 2 Minuten
+
     // erste Switch-Tiefe (Meter)
     var switchDepthM by mutableStateOf("21")
 
@@ -134,7 +136,7 @@ class RockbottomViewModel : ViewModel() {
     var calcSegments by mutableStateOf<List<RockbottomCalculator.Segment>>(emptyList())
         private set
 
-    fun calculateRockBottom() {
+    fun calculateRockbottom() {
 
         if (hasInvalidStops) {
             calcGasL = null; calcBar = null; calcSegments = emptyList()
@@ -161,6 +163,7 @@ class RockbottomViewModel : ViewModel() {
 
         val res = RockbottomCalculator.computeUntilSwitch(
             RockbottomCalculator.Inputs(
+                delayM = delayM.coerceAtLeast(0),
                 bottomDepthM = bottom,
                 switchDepthM = switch,
                 sacPerDiverLpm = sac,
