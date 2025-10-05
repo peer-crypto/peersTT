@@ -17,7 +17,8 @@ object RockbottomCalculator {
         val sacPerDiverLpm: Int,    // pro Taucher @1 ATA (inkl. Stress)
         val cylinderVolumeL: Int,   // z. B. 12
         val divers: Int = 2,
-        val ascentRateMpm: Int = 10,
+        val ascentRateMpm: Int = 15,
+        val delay_m: Int = 2,  // 2 min Verzögerung bis Aufstieg
         val stopsBeforeSwitch: List<Stop>
     )
 
@@ -41,7 +42,7 @@ object RockbottomCalculator {
         data class Hold(val atM: Int, val minutes: Int) : Leg   // Stopp (bei Tiefe)
     }
 
-    private fun buildLegs(bottomM: Int, switchM: Int, rawStops: List<Stop>): List<Leg> {
+    private fun buildLegs(delaym: Int, bottomM: Int, switchM: Int, rawStops: List<Stop>): List<Leg> {
         require(bottomM >= switchM) { "Bottom depth must be >= switch depth" }
 
         // defensive: nur Stops im Korridor, tief → flach
@@ -52,6 +53,8 @@ object RockbottomCalculator {
 
         val legs = mutableListOf<Leg>()
         var currentDepth = bottomM
+
+        legs+=Leg.Hold(currentDepth , minutes=delaym) //Verzögerung bis Aufstieg hinzufügen
 
         for (s in stops) {
             if (s.depthM < currentDepth) {
@@ -75,7 +78,7 @@ object RockbottomCalculator {
     private data class Params(
         val teamSacLpm: Int,
         val ascentRateMpm: Int,
-        val cylinderL: Int
+        val cylinderL: Int,
     )
 
     private fun evaluate(legs: List<Leg>, p: Params): Result {
@@ -92,22 +95,20 @@ object RockbottomCalculator {
             when (leg) {
                 is Leg.Move -> {
                     val delta = (leg.fromM - leg.toM).toDouble()
-                    val timeMin = if (p.ascentRateMpm > 0) delta / p.ascentRateMpm else 0.0 // Sicherheitscheck bzgl. 0 Division
+                    val ascentTime = if (p.ascentRateMpm > 0) delta / p.ascentRateMpm else 0.0 // Sicherheitscheck bzgl. 0 Division
                     val avgM = (leg.fromM + leg.toM) / 2.0
-                    val gas = p.teamSacLpm * ata(avgM) * timeMin
+                    val gasConsumption = p.teamSacLpm * ata(avgM) * ascentTime
                     // Ausgabe je nach Move- Richtung anpassen
                     val direction = if (leg.toM < leg.fromM) "Ascent" else "Descent"
-                    addSeg("$direction ${leg.fromM}→${leg.toM} m", gas)
+                    addSeg("$direction ${leg.fromM}→${leg.toM} m", gasConsumption)
                 }
 
                 is Leg.Hold -> {
-                    val gas = p.teamSacLpm * ata(leg.atM.toDouble()) * leg.minutes
-                    addSeg("Stop @ ${leg.atM} m (${leg.minutes} min)", gas)
+                    val gasConsumption = p.teamSacLpm * ata(leg.atM.toDouble()) * leg.minutes
+                    addSeg("Stop @ ${leg.atM} m (${leg.minutes} min)", gasConsumption)
                 }
             }
         }
-
-
 
 
         val totalL = ceil(total).toInt()                              // am Ende einmal runden
@@ -126,17 +127,19 @@ object RockbottomCalculator {
         val legs = buildLegs(
             bottomM = inputs.bottomDepthM,
             switchM = inputs.switchDepthM,
-            rawStops = inputs.stopsBeforeSwitch
+            rawStops = inputs.stopsBeforeSwitch, // das ist die Stop-Liste
+            delaym =inputs.delay_m
         )
         val params = Params(
             teamSacLpm = inputs.sacPerDiverLpm * inputs.divers,
             ascentRateMpm = inputs.ascentRateMpm,
             cylinderL = inputs.cylinderVolumeL
         )
+
         return evaluate(legs, params)
     }
 
     // (Optional) öffentlich machen,  die reine Herleitung :
     fun buildLegsPublic(inputs: Inputs): List<Leg> =
-        buildLegs(inputs.bottomDepthM, inputs.switchDepthM, inputs.stopsBeforeSwitch)
+        buildLegs(inputs.delay_m,inputs.bottomDepthM, inputs.switchDepthM, inputs.stopsBeforeSwitch)
 }

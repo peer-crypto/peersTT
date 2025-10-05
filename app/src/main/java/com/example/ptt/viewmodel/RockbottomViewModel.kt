@@ -51,7 +51,7 @@ class RockbottomViewModel : ViewModel() {
 
     private fun firstStopDepth(bottom: Int): Int {
         val half = bottom / 2
-        return if (half % 3 == 0) half else half - (half % 3)
+        return if (half % 3 == 0) half else (half - (half % 3))+3
     }
 
     // Nächster 3 m flacher, auf 3er-Raster ausrichten
@@ -165,7 +165,7 @@ class RockbottomViewModel : ViewModel() {
                 switchDepthM = switch,
                 sacPerDiverLpm = sac,
                 cylinderVolumeL = cyl,
-                stopsBeforeSwitch = stops
+                stopsBeforeSwitch = stops  // Liste der Stops
             )
         )
         calcGasL = res.totalGasL
