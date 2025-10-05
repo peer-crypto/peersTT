@@ -142,13 +142,4 @@ object RockbottomCalculator {
 
             return evaluate(legs, params)
         }
-
-        // (Optional) öffentlich machen,  die reine Herleitung :
-        fun buildLegsPublic(inputs: Inputs): List<Leg> =
-            buildLegs(
-                inputs.delay_m,
-                inputs.bottomDepthM,
-                inputs.switchDepthM,
-                inputs.stopsBeforeSwitch
-            )
     }
