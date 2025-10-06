@@ -10,11 +10,13 @@ class RockbottomViewModel : ViewModel() {
     // SAC pro Taucher @1 ATA (inkl. ggf. Stressfaktor, vom Nutzer selbst gewählt)
     var sacPerDiver by mutableStateOf("30") // als String für TextField
 
+    var ascentRateMpm by mutableStateOf("15")
+
     // Zylindergröße (in Litern) und Tiefe (in Metern)
     var cylinderL by mutableStateOf("24")
     var depthM by mutableStateOf("50")
 
-    var delayM by mutableStateOf(2)     // Verzögerung vor Aufstieg Default-Wert 2 Minuten
+    var delayMin by mutableStateOf(2)     // Verzögerung vor Aufstieg Default-Wert 2 Minuten
 
     // erste Switch-Tiefe (Meter)
     var switchDepthM by mutableStateOf("21")
@@ -147,6 +149,8 @@ class RockbottomViewModel : ViewModel() {
         val cyl = cylinderL.toIntOrNull()
         val bottom = depthM.toIntOrNull()
         val switch = switchDepthM.toIntOrNull()
+        val rate = ascentRateMpm.toIntOrNull() ?: 15
+        val delay = delayMin.coerceAtLeast(0)
 
         if (sac == null || cyl == null || bottom == null || switch == null) {
             calcGasL = null; calcBar = null; calcSegments = emptyList(); return
@@ -163,11 +167,12 @@ class RockbottomViewModel : ViewModel() {
 
         val res = RockbottomCalculator.computeUntilSwitch(
             RockbottomCalculator.Inputs(
-                delayM = delayM.coerceAtLeast(0),
+                delayMin = delay,
                 bottomDepthM = bottom,
                 switchDepthM = switch,
                 sacPerDiverLpm = sac,
                 cylinderVolumeL = cyl,
+                ascentRateMpm = rate,
                 stopsBeforeSwitch = stops  // Liste der Stops
             )
         )

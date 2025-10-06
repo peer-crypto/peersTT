@@ -12,14 +12,13 @@ object RockbottomCalculator {
 
     // Variablen
     data class Inputs(
-        val delayM: Int = 0,  // Initialisierung mit 0
         val bottomDepthM: Int,
         val switchDepthM: Int,
         val sacPerDiverLpm: Int,    // pro Taucher @1 ATA (inkl. Stress)
         val cylinderVolumeL: Int,   // z. B. 12
-        val divers: Int = 2,
-        val ascentRateMpm: Int = 15,
-        val delay_m: Int = 2,  // 2 min Verzögerung bis Aufstieg
+        val divers: Int = 2,        // Anzahl Taucher zur Verbrauchsberechnung
+        val ascentRateMpm: Int,
+        val delayMin: Int=0,  // Verzögerung bis Aufstieg
         val stopsBeforeSwitch: List<Stop>
     )
 
@@ -43,7 +42,7 @@ object RockbottomCalculator {
         data class Hold(val atM: Int, val minutes: Int) : Leg   // Stopp (bei Tiefe)
     }
 
-    private fun buildLegs(delayM: Int, bottomM: Int, switchM: Int, rawStops: List<Stop>): List<Leg> {
+    private fun buildLegs(delayMin: Int, bottomM: Int, switchM: Int, rawStops: List<Stop>): List<Leg> {
         require(bottomM >= switchM) { "Bottom depth must be >= switch depth" }
 
         // defensive: nur Stops im Korridor, tief → flach
@@ -56,8 +55,8 @@ object RockbottomCalculator {
         var currentDepth = bottomM
 
         // optionaler Verzögerungs-Abschnitt vor dem Aufstieg
-        if (delayM > 0) {
-            legs += Leg.Hold(atM = currentDepth, minutes = delayM)
+        if (delayMin > 0) {
+            legs += Leg.Hold(atM = currentDepth, minutes = delayMin)
 
             for (s in stops) {
                 if (s.depthM < currentDepth) {
@@ -132,12 +131,12 @@ object RockbottomCalculator {
                 bottomM = inputs.bottomDepthM,
                 switchM = inputs.switchDepthM,
                 rawStops = inputs.stopsBeforeSwitch, // das ist die Stop-Liste
-                delayM = inputs.delayM
+                delayMin = inputs.delayMin
             )
             val params = Params(
                 teamSacLpm = inputs.sacPerDiverLpm * inputs.divers,
                 ascentRateMpm = inputs.ascentRateMpm,
-                cylinderL = inputs.cylinderVolumeL
+                cylinderL = inputs.cylinderVolumeL,
             )
 
             return evaluate(legs, params)

@@ -10,7 +10,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ptt.viewmodel.RockbottomViewModel
 import androidx.navigation.NavHostController
 import androidx.compose.runtime.remember
-import com.example.ptt.navigation.Routes
+import com.example.ptt.navigation.Route
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 
 
 @Composable
@@ -20,7 +22,7 @@ fun RockbottomResultScreen(
 ) {
 
     // shared VM vom RockBottom-Backstack holen
-    val parentEntry = remember(nav) { nav.getBackStackEntry(Routes.ROCKBOTTOM) }
+    val parentEntry = remember(nav) { nav.getBackStackEntry(Route.Rockbottom.path) }
     val vm: RockbottomViewModel = viewModel(parentEntry)
 
     Column(
@@ -34,7 +36,7 @@ fun RockbottomResultScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextButton(onClick = onBack) { Text("‹ Back") }
-            Text("RockBottom – Result", style = MaterialTheme.typography.titleLarge)
+            Text("Rockbottom – Result", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.width(48.dp))
         }
 
@@ -59,7 +61,7 @@ fun RockbottomResultScreen(
 
             // Platzhalter: Hier später „Herleitung/Segments“ einblenden
             Spacer(Modifier.height(24.dp))
-            Text("Details:", style = MaterialTheme.typography.bodyMedium)
+            HorizontalDivider()
         } else {
             Text("No result available. Please go back and calculate.",
                 style = MaterialTheme.typography.bodyMedium)
@@ -67,13 +69,63 @@ fun RockbottomResultScreen(
 
         Spacer(Modifier.height(8.dp))
 
-        Text("${vm.calcSegments}")
+// "Details:"
+        val sac = vm.sacPerDiver.toString().toDoubleOrNull() ?: 0.0
+        val teamSac = sac * 2// Casten: String in Zahl
+        val ascent = vm.ascentRateMpm.toString().toIntOrNull() ?: 0
+
+        Row(    // beide Ausgben in einer Zeile
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text("Stress SAC:", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = String.format("%.1f × 2 = %.1f L/min ;", sac, teamSac),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "Ascent: ${ascent} m/min",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        Spacer(Modifier.height(8.dp))
 
 
+        val segments = vm.calcSegments
+        if (segments.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                itemsIndexed(segments, key = { i, seg -> "${seg.label}_$i" }) { i, seg ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("${seg.label}", style = MaterialTheme.typography.bodyLarge)
+                        Text("${seg.gasL} L", style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
 
-
-
-
+                // Summenzeile am Ende
+                item {
+                    Spacer(Modifier.height(8.dp))
+                    HorizontalDivider()
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Summe Gas:", style = MaterialTheme.typography.titleMedium)
+                        Text("${vm.calcGasL} L", style = MaterialTheme.typography.titleMedium)
+                    }
+                }
+            }
+        } else {
+            Spacer(Modifier.height(8.dp))
+            Text("Keine Segmentdaten vorhanden.", style = MaterialTheme.typography.bodyMedium)
+        }
 
     }
 }
