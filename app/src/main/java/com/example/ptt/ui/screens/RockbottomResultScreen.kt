@@ -43,7 +43,7 @@ fun RockbottomResultScreen(
         Spacer(Modifier.height(16.dp))
 
         if (vm.calcGasL != null && vm.calcBar != null) {
-            Text("Gas until first switch",
+            Text("Gas to first switch",
                 style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
             Text("${vm.calcGasL} L",
@@ -59,11 +59,21 @@ fun RockbottomResultScreen(
 
             // Platzhalter: Hier später „Herleitung/Segments“ einblenden
             Spacer(Modifier.height(24.dp))
-            Text("Details will follow (derivation & segments)",
-                style = MaterialTheme.typography.bodySmall)
+            Text("Details:", style = MaterialTheme.typography.bodyMedium)
         } else {
             Text("No result available. Please go back and calculate.",
                 style = MaterialTheme.typography.bodyMedium)
         }
+
+        Spacer(Modifier.height(8.dp))
+
+        Text("${vm.calcSegments}")
+
+
+
+
+
+
+
     }
 }
