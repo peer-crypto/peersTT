@@ -8,12 +8,15 @@ import com.example.ptt.ui.screens.DeepstopScreen
 import com.example.ptt.ui.screens.HomeScreen
 import com.example.ptt.ui.screens.RockbottomScreen
 import com.example.ptt.ui.screens.RockbottomResultScreen
+import com.example.ptt.ui.screens.RockbottomDetailsScreen
 
 sealed class Route(val path: String) {
     data object Home : Route("home")
     data object Deepstop : Route("deepstop")
     data object Rockbottom : Route("rockbottom")
     data object RockbottomResult : Route("rockbottom_result")
+
+    data object RockbottomDetails : Route("rockbottom_details")
 }
 
 
@@ -42,5 +45,13 @@ fun AppNavGraph(nav: NavHostController) {
                 nav = nav
             )
         }
+
+        composable(Route.RockbottomDetails.path) {
+            RockbottomDetailsScreen(
+                onBack = { nav.popBackStack() },
+                nav = nav
+            )
+        }
+
     }
 }

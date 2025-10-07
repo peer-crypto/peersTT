@@ -11,8 +11,6 @@ import com.example.ptt.viewmodel.RockbottomViewModel
 import androidx.navigation.NavHostController
 import androidx.compose.runtime.remember
 import com.example.ptt.navigation.Route
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 
 
 @Composable
@@ -45,31 +43,52 @@ fun RockbottomResultScreen(
         Spacer(Modifier.height(16.dp))
 
         if (vm.calcGasL != null && vm.calcBar != null) {
-            Text("Gas to first switch",
-                style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Gas to first switch",
+                style = MaterialTheme.typography.titleMedium
+            )
             Spacer(Modifier.height(4.dp))
-            Text("${vm.calcGasL} L",
-                style = MaterialTheme.typography.headlineMedium)
+            Text(
+                "${vm.calcGasL} L",
+                style = MaterialTheme.typography.headlineMedium
+            )
 
             Spacer(Modifier.height(16.dp))
 
-            Text("Required cylinder pressure",
-                style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Required cylinder pressure",
+                style = MaterialTheme.typography.titleMedium
+            )
             Spacer(Modifier.height(4.dp))
-            Text("${vm.calcBar} bar",
-                style = MaterialTheme.typography.headlineMedium)
+            Text(
+                "${vm.calcBar} bar",
+                style = MaterialTheme.typography.headlineMedium
+            )
 
-            // Platzhalter: Hier später „Herleitung/Segments“ einblenden
+
             Spacer(Modifier.height(24.dp))
             HorizontalDivider()
+
+            Spacer(Modifier.height(16.dp))
+
+            Button(
+                onClick = { nav.navigate(Route.RockbottomDetails.path) },
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text("Details anzeigen")
+            }
         } else {
-            Text("No result available. Please go back and calculate.",
-                style = MaterialTheme.typography.bodyMedium)
+            Text(
+                "No result available. Please go back and calculate.",
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
 
         Spacer(Modifier.height(8.dp))
+    }
 
-// "Details:"
+}
+/*
         val sac = vm.sacPerDiver.toString().toDoubleOrNull() ?: 0.0
         val teamSac = sac * 2// Casten: String in Zahl
         val ascent = vm.ascentRateMpm.toString().toIntOrNull() ?: 0
@@ -128,4 +147,4 @@ fun RockbottomResultScreen(
         }
 
     }
-}
+}*/

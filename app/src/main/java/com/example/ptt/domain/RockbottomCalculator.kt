@@ -90,6 +90,7 @@ object RockbottomCalculator {
             val segs = mutableListOf<Segment>()
             var total = 0.0
 
+            //Überladene Funktion zur Umwandlung einer Zahl in einen String mit zwei Nachkommastellen und , als Dezimalzeichen
             // Für Double-Werte
             fun fmt(d: Double, decimals: Int = 1): String =
                 String.format(java.util.Locale.GERMAN, "%.${decimals}f", d)
