@@ -23,7 +23,10 @@ object RockbottomCalculator {
     )
 
     // Ein Stopsegment incl. Aufstieg dorthin mit der sich daraus ergebenden Gasmenge
-    data class Segment(val label: String, val gasL: Int)
+    data class Segment(
+        val label: String,
+        val gasL: Int,
+        val formula: String)
 
     // Die Gesamtberechnung
     data class Result(
@@ -87,32 +90,51 @@ object RockbottomCalculator {
             val segs = mutableListOf<Segment>()
             var total = 0.0
 
-            fun addSeg(label: String, gas: Double) {
-                val g = ceil(gas).toInt()           // aufrunden
-                if (g > 0) segs += Segment(label, g)
-                total += gas                        // ungerundet summieren
+            // Für Double-Werte
+            fun fmt(d: Double, decimals: Int = 1): String =
+                String.format(java.util.Locale.GERMAN, "%.${decimals}f", d)
+
+            // Überladung für Int-Werte
+            fun fmt(d: Int, decimals: Int = 0): String =
+                fmt(d.toDouble(), decimals)
+
+
+            fun addSeg(label: String, gas: Double, formula: String) {
+                val g = kotlin.math.ceil(gas).toInt()   // Anzeige aufrunden
+                if (g > 0) segs += Segment(label = label, gasL = g, formula = formula)
+                total += gas                            // ungerundet summieren
             }
 
             legs.forEach { leg ->
                 when (leg) {
                     is Leg.Move -> {
-                        val delta = (leg.fromM - leg.toM).toDouble()
-                        val ascentTime =
-                            if (p.ascentRateMpm > 0) delta / p.ascentRateMpm else 0.0 // Sicherheitscheck bzgl. 0 Division
-                        val avgM = (leg.fromM + leg.toM) / 2.0
-                        val gasConsumption = p.teamSacLpm * ata(avgM) * ascentTime
-                        // Ausgabe je nach Move- Richtung anpassen
-                        val direction = if (leg.toM < leg.fromM) "Ascent" else "Descent"
-                        addSeg("$direction ${leg.fromM}→${leg.toM} m", gasConsumption)
-                    }
+                        val deltaM = (leg.fromM - leg.toM).toDouble()
+                        val minutes = if (p.ascentRateMpm > 0)
+                            kotlin.math.abs(deltaM) / p.ascentRateMpm
+                        else 0.0
 
+                        val avgM = (leg.fromM + leg.toM) / 2.0
+                        val ata = ata(avgM) // z.B. 1 + avgM/10
+                        val gas = p.teamSacLpm * ata * minutes
+
+                        val direction = if (leg.toM < leg.fromM) "Ascent" else "Descent"
+                        val label = "$direction ${leg.fromM}→${leg.toM} m"
+                        val formula = "${fmt(p.teamSacLpm,0)} × ${fmt(ata)} × ${fmt(minutes)}"
+
+                        addSeg(label, gas, formula)
+                    }
                     is Leg.Hold -> {
-                        val gasConsumption = p.teamSacLpm * ata(leg.atM.toDouble()) * leg.minutes
-                        addSeg("Stop @ ${leg.atM} m (${leg.minutes} min)", gasConsumption)
+                        val ata = ata(leg.atM.toDouble())
+                        val minutes = leg.minutes.toDouble()
+                        val gas = p.teamSacLpm * ata * minutes
+
+                        val label = "Stop @ ${leg.atM} m (${leg.minutes} min)"
+                        val formula = "${fmt(p.teamSacLpm,0)} × ${fmt(ata)} × ${fmt(minutes)}"
+
+                        addSeg(label, gas, formula)
                     }
                 }
             }
-
 
             val totalL = ceil(total).toInt()                              // am Ende einmal runden
             val bar = ceil(totalL / p.cylinderL.toDouble()).toInt()
