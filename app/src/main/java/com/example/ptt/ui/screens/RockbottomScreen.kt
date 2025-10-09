@@ -18,20 +18,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ptt.viewmodel.RockbottomViewModel
+import androidx.activity.compose.LocalActivity
+import androidx.activity.ComponentActivity
 
 @Composable
 
 fun RockbottomScreen(
     onBack: () -> Unit,
-    onShowResult: () -> Unit,
-    vm: RockbottomViewModel = viewModel()) {
+    onShowResult: () -> Unit)
+    {
+
+    val activity = LocalActivity.current as ComponentActivity
+    val vm: RockbottomViewModel = viewModel(activity)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .navigationBarsPadding(), // Inhalt kollidiert nicht mit Systemleiste
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
+
+
     ) {
         // Header
         Row(
@@ -44,42 +52,7 @@ fun RockbottomScreen(
             Spacer(Modifier.width(48.dp))
         }
 
-        Spacer(Modifier.height(16.dp))
 
-        // SAC per diver
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                "SAC per diver (L/min)",
-                style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.width(120.dp)
-            )  // feste Breite für Label
-            CompactNumberField(
-                value = vm.sacPerDiver,
-                onValueChange = { vm.sacPerDiver = it }
-            )
-        }
-
-
-        Spacer(Modifier.height(12.dp))
-
-        // Cylinder size
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                "Cylinder (L)",
-                style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.width(120.dp)
-            )
-            CompactNumberField(
-                value = vm.cylinderL,
-                onValueChange = { vm.cylinderL = it }
-            )
-        }
 
         Spacer(Modifier.height(12.dp))
 

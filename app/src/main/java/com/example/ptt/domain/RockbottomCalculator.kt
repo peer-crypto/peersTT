@@ -14,7 +14,8 @@ object RockbottomCalculator {
     data class Inputs(
         val bottomDepthM: Int,
         val switchDepthM: Int,
-        val sacPerDiverLpm: Int,    // pro Taucher @1 ATA (inkl. Stress)
+        val sacPerDiverLpm: Double,    // pro Taucher @1 ATA
+        val stressFactor: Double,
         val cylinderVolumeL: Int,   // z. B. 12
         val divers: Int = 2,        // Anzahl Taucher zur Verbrauchsberechnung
         val ascentRateMpm: Int,
@@ -81,7 +82,7 @@ object RockbottomCalculator {
     }
         // ---- Phase 2: Legs auswerten – Physik/Mathematik ----
         private data class Params(
-            val teamSacLpm: Int,
+            val teamSacLpm: Double,
             val ascentRateMpm: Int,
             val cylinderL: Int,
         )
@@ -127,7 +128,7 @@ object RockbottomCalculator {
                     is Leg.Hold -> {
                         val ata = ata(leg.atM.toDouble())
                         val minutes = leg.minutes.toDouble()
-                        val gas = p.teamSacLpm * ata * minutes
+                        val gas = p.teamSacLpm  * ata * minutes
 
                         val label = "Stop @ ${leg.atM} m (${leg.minutes} min)"
                         val formula = "${fmt(p.teamSacLpm,0)} × ${fmt(ata)} × ${fmt(minutes)}"
@@ -157,9 +158,10 @@ object RockbottomCalculator {
                 delayMin = inputs.delayMin
             )
             val params = Params(
-                teamSacLpm = inputs.sacPerDiverLpm * inputs.divers,
+                teamSacLpm = inputs.sacPerDiverLpm * inputs.divers* inputs.stressFactor,
                 ascentRateMpm = inputs.ascentRateMpm,
                 cylinderL = inputs.cylinderVolumeL,
+
             )
 
             return evaluate(legs, params)

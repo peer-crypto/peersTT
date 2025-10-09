@@ -11,8 +11,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ptt.viewmodel.RockbottomViewModel
 import androidx.navigation.NavHostController
-import androidx.compose.runtime.remember
-import com.example.ptt.navigation.Route
+import androidx.activity.compose.LocalActivity
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 
@@ -24,8 +24,8 @@ fun RockbottomDetailsScreen(
     nav: NavHostController,
 ) {
     // shared VM vom Rockbottom-Backstack holen
-    val parentEntry = remember(nav) { nav.getBackStackEntry(Route.Rockbottom.path) }
-    val vm: RockbottomViewModel = viewModel(parentEntry)
+    val activity = LocalActivity.current as ComponentActivity
+    val vm: RockbottomViewModel = viewModel(activity)
 
     Column(
         modifier = Modifier
@@ -50,31 +50,26 @@ fun RockbottomDetailsScreen(
         HorizontalDivider()
         Spacer(Modifier.height(16.dp))
 
-        // Optional: Parameter kurz oben
+        // Parameter kurz oben
         val sac = vm.sacPerDiver.toString().toDoubleOrNull() ?: 0.0
         val teamSac = sac * 2
         val ascent = vm.ascentRateMpm.toString().toIntOrNull() ?: 0
         val delay = vm.delayMin.toString().toIntOrNull() ?: 0
 
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = String.format("SAC: %.1f × 2 = %.1f L/min", sac, teamSac),
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                text = "Ascent: $ascent m/min",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
+        Text(
+            text = String.format("SAC: %.1f × 2 = %.1f L/min", sac, teamSac),
+            style = MaterialTheme.typography.bodySmall
+        )
+        Text(
+            text = "Ascent: $ascent m/min",
+            style = MaterialTheme.typography.bodySmall
+        )
 
         Text(
             text = "Delay: $delay min:",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.align(Alignment.Start)
+            style = MaterialTheme.typography.bodySmall,
+            //modifier = Modifier.align(Alignment.Start)
         )
 
         Spacer(Modifier.height(16.dp))
@@ -122,14 +117,14 @@ fun RockbottomDetailsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Total Gas:", style = MaterialTheme.typography.titleMedium)
+                    Text("Total gas:", style = MaterialTheme.typography.titleMedium)
                     Text("${vm.calcGasL} L", style = MaterialTheme.typography.titleMedium)
                 }
             }
 
             //  Herleitung Umrechnung in bar
             item {
-                val gas = vm.calcGasL ?: 0
+                //val gas = vm.calcGasL ?: 0
                 val cyl = vm.cylinderL.toIntOrNull() ?: 1
                 val bar = vm.calcBar ?: 0   // falls noch null, dann 0
 

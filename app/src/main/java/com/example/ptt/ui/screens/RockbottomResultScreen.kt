@@ -9,8 +9,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ptt.viewmodel.RockbottomViewModel
 import androidx.navigation.NavHostController
-import androidx.compose.runtime.remember
 import com.example.ptt.navigation.Route
+import androidx.activity.compose.LocalActivity
+import androidx.activity.ComponentActivity
+
 
 
 @Composable
@@ -20,8 +22,8 @@ fun RockbottomResultScreen(
 ) {
 
     // shared VM vom RockBottom-Backstack holen
-    val parentEntry = remember(nav) { nav.getBackStackEntry(Route.Rockbottom.path) }
-    val vm: RockbottomViewModel = viewModel(parentEntry)
+    val activity = LocalActivity.current as ComponentActivity
+    val vm: RockbottomViewModel = viewModel(activity)
 
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -88,63 +90,3 @@ fun RockbottomResultScreen(
     }
 
 }
-/*
-        val sac = vm.sacPerDiver.toString().toDoubleOrNull() ?: 0.0
-        val teamSac = sac * 2// Casten: String in Zahl
-        val ascent = vm.ascentRateMpm.toString().toIntOrNull() ?: 0
-
-        Row(    // beide Ausgben in einer Zeile
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text("Stress SAC:", style = MaterialTheme.typography.bodyMedium)
-            Text(
-                text = String.format("%.1f × 2 = %.1f L/min ;", sac, teamSac),
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                text = "Ascent: ${ascent} m/min",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-        Spacer(Modifier.height(8.dp))
-
-
-        val segments = vm.calcSegments
-        if (segments.isNotEmpty()) {
-            Spacer(Modifier.height(8.dp))
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                itemsIndexed(segments, key = { i, seg -> "${seg.label}_$i" }) { i, seg ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("${seg.label}", style = MaterialTheme.typography.bodyLarge)
-                        Text("${seg.gasL} L", style = MaterialTheme.typography.bodyLarge)
-                    }
-                }
-
-                // Summenzeile am Ende
-                item {
-                    Spacer(Modifier.height(8.dp))
-                    HorizontalDivider()
-                    Spacer(Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("Summe Gas:", style = MaterialTheme.typography.titleMedium)
-                        Text("${vm.calcGasL} L", style = MaterialTheme.typography.titleMedium)
-                    }
-                }
-            }
-        } else {
-            Spacer(Modifier.height(8.dp))
-            Text("Keine Segmentdaten vorhanden.", style = MaterialTheme.typography.bodyMedium)
-        }
-
-    }
-}*/

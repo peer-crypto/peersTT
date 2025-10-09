@@ -6,17 +6,21 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.ptt.domain.RockbottomCalculator
 
+
 class RockbottomViewModel : ViewModel() {
-    // SAC pro Taucher @1 ATA (inkl. ggf. Stressfaktor, vom Nutzer selbst gewählt)
-    var sacPerDiver by mutableStateOf("30") // als String für TextField
+    // SAC pro Taucher @1 ATA
+    var sacPerDiver by mutableStateOf("15") // als String für TextField
+
+    var stressFactor by mutableStateOf("2") // als String für TextField
 
     var ascentRateMpm by mutableStateOf("15")
 
     // Zylindergröße (in Litern) und Tiefe (in Metern)
     var cylinderL by mutableStateOf("24")
+
     var depthM by mutableStateOf("50")
 
-    var delayMin by mutableStateOf(2)     // Verzögerung vor Aufstieg Default-Wert 2 Minuten
+    var delayMin by mutableStateOf("2")     // Verzögerung vor Aufstieg Default-Wert 2 Minuten
 
     // erste Switch-Tiefe (Meter)
     var switchDepthM by mutableStateOf("21")
@@ -145,12 +149,13 @@ class RockbottomViewModel : ViewModel() {
             return
         }
         // Parsing & einfache Validierung
-        val sac = sacPerDiver.toIntOrNull()
+        val sac = sacPerDiver.toDoubleOrNull()
+        val stress = stressFactor.toDoubleOrNull()?: 2.0
         val cyl = cylinderL.toIntOrNull()
         val bottom = depthM.toIntOrNull()
         val switch = switchDepthM.toIntOrNull()
         val rate = ascentRateMpm.toIntOrNull() ?: 15
-        val delay = delayMin.coerceAtLeast(0)
+        val delay = delayMin.toIntOrNull()?: 2
 
         if (sac == null || cyl == null || bottom == null || switch == null) {
             calcGasL = null; calcBar = null; calcSegments = emptyList(); return
@@ -171,6 +176,7 @@ class RockbottomViewModel : ViewModel() {
                 bottomDepthM = bottom,
                 switchDepthM = switch,
                 sacPerDiverLpm = sac,
+                stressFactor = stress,
                 cylinderVolumeL = cyl,
                 ascentRateMpm = rate,
                 stopsBeforeSwitch = stops  // Liste der Stops
