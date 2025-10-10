@@ -18,9 +18,13 @@ fun HomeScreen(
     onSettings: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp)
+            .navigationBarsPadding(),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+
     ) {
         Text("Peer's TEC-Tools", style = MaterialTheme.typography.headlineLarge)
 

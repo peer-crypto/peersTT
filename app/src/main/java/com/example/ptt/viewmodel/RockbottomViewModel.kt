@@ -193,7 +193,7 @@ class RockbottomViewModel : ViewModel() {
             calcSegments = res.segments
         }
 
-    // Für DetailsScreen
+    // Variablenumformung für DetailsScreen
     fun effectiveCylinderL(): Int {
         val s = SettingsRepository.settings.value
         return cylinderL.trim().toIntOrNull() ?: s.cylinderL
@@ -213,6 +213,14 @@ class RockbottomViewModel : ViewModel() {
         return parsed ?: s.sacPerDiver.toDouble()  // falls s.sacPerDiver schon Double ist: ohne .toDouble()
     }
 
+    fun effectivStressFactor    (): Double {
+        val s = SettingsRepository.settings.value
+        val parsed = stressFactor
+            .trim()
+            .replace(',', '.')
+            .toDoubleOrNull()
+        return parsed ?: s.stressFactor.toDouble()
+    }
 
         // kleine Helper (optional)
         fun Double.roundToIntSafely(): Int =

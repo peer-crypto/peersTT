@@ -58,12 +58,14 @@ fun RockbottomDetailsScreen(
         val ascent = vm.ascentRateMpm.toIntOrNull() ?: s.ascentRateMpm
         val delayShown = vm.effectiveDelayMin()
         val sacShown =vm.effectiveSac()
-        val teamSac = sacShown * 2
+        val factorShown = vm.effectivStressFactor()
+        val teamSac = sacShown * 2 * factorShown
+
 
 
 
         Text(
-            text = String.format("SAC: %.1f × 2 = %.1f L/min", sacShown, teamSac),
+            text = String.format("Team-SAC: %.1f × %.1f * 2 = %.1f L/min", sacShown,factorShown, teamSac),
             style = MaterialTheme.typography.bodySmall
         )
         Text(

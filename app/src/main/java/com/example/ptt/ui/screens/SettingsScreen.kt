@@ -85,7 +85,7 @@ fun SettingsScreen(
             value = settings.ascentRateMpm
         ) { v -> SettingsRepository.update { it.copy(ascentRateMpm = v) } }
 
-        Spacer(modifier = Modifier.weight(1f))   //  schiebt Button nach unten
+        Spacer(modifier = Modifier.height(32.dp))   //  schiebt Button nach unten
 
         Button(
             onClick = { focus.clearFocus(); onBack() },
