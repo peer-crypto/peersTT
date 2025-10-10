@@ -4,6 +4,12 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+dependencies {
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6") // viewModelScope
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0") // sicherheitshalber
+}
+
+
 android {
     namespace = "com.example.ptt"
     compileSdk = 36
@@ -18,8 +24,25 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+
     buildTypes {
-        release {
+        getByName("debug") {
+            // Deine bestehende Debug-App bleibt: com.example.ptt
+            // Optional erkennbar machen:
+            versionNameSuffix = "-debug"
+            // resValue("string", "app_name", "PTT (Debug)")
+        }
+
+        // Zweite Debug-Variante, parallel installierbar
+        create("dev") {
+            initWith(getByName("debug"))           // erbt Debug-Einstellungen (debuggable etc.)
+            applicationIdSuffix = ".dev"           // -> com.example.ptt.dev
+            versionNameSuffix = "-dev"
+            // Optional eigener Anzeigename:
+            // resValue("string", "app_name", "PTT (Dev)")
+        }
+
+        getByName("release") {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

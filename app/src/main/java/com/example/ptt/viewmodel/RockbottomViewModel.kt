@@ -10,7 +10,7 @@ import com.example.ptt.domain.settings.SettingsRepository
 import kotlinx.coroutines.flow.StateFlow
 
 
-class RockbottomViewModel : ViewModel() {
+class RockbottomViewModel : ViewModel() {   // erbt von ViewModel
     // UI-Felder (Strings, weil TextField)
     var sacPerDiver   by mutableStateOf("")
     var stressFactor  by mutableStateOf("")
@@ -25,7 +25,8 @@ class RockbottomViewModel : ViewModel() {
 
 
     // Ein einzelner Deko-Stop (Tiefe + Dauer)
-    data class DecoStop(var depthM: String = "", var minutes: String = "")
+    data class DecoStop(var depthM: String = "",
+                        var minutes: String = "")
 
     // Liste der Stops als State
     val decoStops = androidx.compose.runtime.mutableStateListOf<DecoStop>()

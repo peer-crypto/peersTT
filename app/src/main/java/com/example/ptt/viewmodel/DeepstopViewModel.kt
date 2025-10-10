@@ -7,7 +7,7 @@ import androidx.compose.runtime.setValue
 import com.example.ptt.domain.DeepstopCalculator
 
 
-class DeepstopViewModel : ViewModel() {
+class DeepstopViewModel : ViewModel() {         // erbt von ViewModel
     val options: List<Int> = (40..100 step 5).toList()
 
 

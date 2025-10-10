@@ -79,11 +79,20 @@ fun SettingsScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        // Ascent rate (Int)
+        // Ascent rate
         SettingRowInt(
             label = "Ascent rate (m/min)",
             value = settings.ascentRateMpm
         ) { v -> SettingsRepository.update { it.copy(ascentRateMpm = v) } }
+
+        Spacer(Modifier.height(16.dp))
+
+        // Descent rate
+        SettingRowInt(
+            label = "Descent rate (m/min)",
+            value = settings.descentRateMpm
+        ) { v -> SettingsRepository.update { it.copy(descentRateMpm = v) } }
+
 
         Spacer(modifier = Modifier.height(32.dp))   //  schiebt Button nach unten
 
@@ -96,12 +105,7 @@ fun SettingsScreen(
         ),
         ) { Text("Done") }
     }
-
-
-
 }
-
-
 
 
 /* ---------- Helfer-Composables ---------- */

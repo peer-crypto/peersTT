@@ -65,7 +65,7 @@ fun RockbottomDetailsScreen(
 
 
         Text(
-            text = String.format("Team-SAC: %.1f × %.1f * 2 = %.1f L/min", sacShown,factorShown, teamSac),
+            text = String.format("Team-SAC: %.1f × %.1f × 2 = %.1f L/min", sacShown,factorShown, teamSac),
             style = MaterialTheme.typography.bodySmall
         )
         Text(
