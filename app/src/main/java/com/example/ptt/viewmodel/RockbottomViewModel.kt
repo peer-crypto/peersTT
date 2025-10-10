@@ -1,29 +1,28 @@
 package com.example.ptt.viewmodel
 
+import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
 import com.example.ptt.domain.RockbottomCalculator
+import com.example.ptt.domain.settings.Settings
+import com.example.ptt.domain.settings.SettingsRepository
+import kotlinx.coroutines.flow.StateFlow
 
 
 class RockbottomViewModel : ViewModel() {
-    // SAC pro Taucher @1 ATA
-    var sacPerDiver by mutableStateOf("15") // als String für TextField
+    // UI-Felder (Strings, weil TextField)
+    var sacPerDiver   by mutableStateOf("")
+    var stressFactor  by mutableStateOf("")
+    var ascentRateMpm by mutableStateOf("")
+    var cylinderL     by mutableStateOf("")
+    var depthM        by mutableStateOf("50")   // bleibt Pflicht (oder Settings nutzen)
+    var switchDepthM  by mutableStateOf("21")
+    var delayMin      by mutableStateOf("")
 
-    var stressFactor by mutableStateOf("2") // als String für TextField
+    // Globale Settings lesen
+    val settingsFlow: StateFlow<Settings> = SettingsRepository.settings
 
-    var ascentRateMpm by mutableStateOf("15")
-
-    // Zylindergröße (in Litern) und Tiefe (in Metern)
-    var cylinderL by mutableStateOf("24")
-
-    var depthM by mutableStateOf("50")
-
-    var delayMin by mutableStateOf("2")     // Verzögerung vor Aufstieg Default-Wert 2 Minuten
-
-    // erste Switch-Tiefe (Meter)
-    var switchDepthM by mutableStateOf("21")
 
     // Ein einzelner Deko-Stop (Tiefe + Dauer)
     data class DecoStop(var depthM: String = "", var minutes: String = "")
@@ -50,6 +49,7 @@ class RockbottomViewModel : ViewModel() {
 
         decoStops.add(DecoStop(depthM = defaultDepth.toString(), minutes = "1"))
     }
+
     // Helper: Stops aufsteigend
     private fun bottomDepth(): Int? = depthM.toIntOrNull()
     private fun switchDepth(): Int? = switchDepthM.toIntOrNull()
@@ -59,7 +59,7 @@ class RockbottomViewModel : ViewModel() {
 
     private fun firstStopDepth(bottom: Int): Int {
         val half = bottom / 2
-        return if (half % 3 == 0) half else (half - (half % 3))+3
+        return if (half % 3 == 0) half else (half - (half % 3)) + 3
     }
 
     // Nächster 3 m flacher, auf 3er-Raster ausrichten
@@ -98,7 +98,8 @@ class RockbottomViewModel : ViewModel() {
         if (!isDepthInRange(self)) return false
 
         val prev = if (index > 0) decoStops[index - 1].depthM.toIntOrNull() else null
-        val next = if (index < decoStops.lastIndex) decoStops[index + 1].depthM.toIntOrNull() else null
+        val next =
+            if (index < decoStops.lastIndex) decoStops[index + 1].depthM.toIntOrNull() else null
         val okPrev = prev?.let { self <= it } ?: true
         val okNext = next?.let { self >= it } ?: true
         return okPrev && okNext
@@ -142,50 +143,80 @@ class RockbottomViewModel : ViewModel() {
     var calcSegments by mutableStateOf<List<RockbottomCalculator.Segment>>(emptyList())
         private set
 
-    fun calculateRockbottom() {
 
-        if (hasInvalidStops) {
-            calcGasL = null; calcBar = null; calcSegments = emptyList()
-            return
-        }
-        // Parsing & einfache Validierung
-        val sac = sacPerDiver.toDoubleOrNull()
-        val stress = stressFactor.toDoubleOrNull()?: 2.0
-        val cyl = cylinderL.toIntOrNull()
-        val bottom = depthM.toIntOrNull()
-        val switch = switchDepthM.toIntOrNull()
-        val rate = ascentRateMpm.toIntOrNull() ?: 15
-        val delay = delayMin.toIntOrNull()?: 2
 
-        if (sac == null || cyl == null || bottom == null || switch == null) {
-            calcGasL = null; calcBar = null; calcSegments = emptyList(); return
-        }
-        if (bottom < switch) {
-            calcGasL = null; calcBar = null; calcSegments = emptyList(); return
-        }
+        fun calculateRockbottom() {
 
-        val stops = decoStops.mapNotNull {
-            val d = it.depthM.toIntOrNull()
-            val m = it.minutes.toIntOrNull()
-            if (d != null && m != null) RockbottomCalculator.Stop(d, m) else null
-        }
+            if (hasInvalidStops) {
+                calcGasL = null; calcBar = null; calcSegments = emptyList()
+                return
+            }
 
-        val res = RockbottomCalculator.computeUntilSwitch(
-            RockbottomCalculator.Inputs(
-                delayMin = delay,
-                bottomDepthM = bottom,
-                switchDepthM = switch,
-                sacPerDiverLpm = sac,
-                stressFactor = stress,
-                cylinderVolumeL = cyl,
-                ascentRateMpm = rate,
-                stopsBeforeSwitch = stops  // Liste der Stops
+            fun parseDoubleOrNullIfNotBlank(txt: String): Double? =
+                txt.trim().takeIf { it.isNotBlank() }?.replace(',', '.')?.toDoubleOrNull()
+
+            fun parseIntOrNullIfNotBlank(txt: String): Int? =
+                txt.trim().takeIf { it.isNotBlank() }?.toIntOrNull()
+
+            val s = SettingsRepository.settings.value
+
+            val sac = parseDoubleOrNullIfNotBlank(sacPerDiver) ?: s.sacPerDiver
+            val cyl = parseIntOrNullIfNotBlank(cylinderL) ?: s.cylinderL
+            val rate = parseIntOrNullIfNotBlank(ascentRateMpm) ?: s.ascentRateMpm
+            val delay = parseIntOrNullIfNotBlank(delayMin) ?: s.delayMin
+            val stress = parseDoubleOrNullIfNotBlank(stressFactor) ?: s.stressFactor
+            val bottom = parseIntOrNullIfNotBlank(depthM) ?: return
+            val switch = parseIntOrNullIfNotBlank(switchDepthM) ?: return
+
+
+            val stops = decoStops.mapNotNull {
+                val d = it.depthM.toIntOrNull()
+                val m = it.minutes.toIntOrNull()
+                if (d != null && m != null) RockbottomCalculator.Stop(d, m) else null
+            }
+
+            val res = RockbottomCalculator.computeUntilSwitch(
+                RockbottomCalculator.Inputs(
+                    bottomDepthM = bottom,
+                    switchDepthM = switch,
+                    sacPerDiverLpm = sac,      // Double
+                    stressFactor = stress,   // Double
+                    cylinderL = cyl,      // Int
+                    ascentRateMpm = rate,     // Int
+                    delayMin = delay,    // Int
+                    stopsBeforeSwitch = stops
+                )
             )
-        )
-        calcGasL = res.totalGasL
-        calcBar = res.requiredBar
-        calcSegments = res.segments
+
+            calcGasL = kotlin.math.ceil(res.totalGasL).toInt()
+            calcBar = kotlin.math.ceil(res.requiredBar).toInt()
+            calcSegments = res.segments
+        }
+
+    // Für DetailsScreen
+    fun effectiveCylinderL(): Int {
+        val s = SettingsRepository.settings.value
+        return cylinderL.trim().toIntOrNull() ?: s.cylinderL
     }
-}
+
+    fun effectiveDelayMin(): Int {
+        val s = SettingsRepository.settings.value
+        return delayMin.trim().toIntOrNull() ?: s.delayMin
+    }
+
+    fun effectiveSac(): Double {
+        val s = SettingsRepository.settings.value
+        val parsed = sacPerDiver
+            .trim()
+            .replace(',', '.')      // "14,5" -> "14.5"
+            .toDoubleOrNull()
+        return parsed ?: s.sacPerDiver.toDouble()  // falls s.sacPerDiver schon Double ist: ohne .toDouble()
+    }
+
+
+        // kleine Helper (optional)
+        fun Double.roundToIntSafely(): Int =
+            kotlin.math.ceil(this).toInt()
+    }
 
 

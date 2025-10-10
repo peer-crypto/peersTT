@@ -1,6 +1,6 @@
 package com.example.ptt.ui.screens
 
-import CompactNumberField
+import com.example.ptt.ui.components.CompactNumberField
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -62,7 +62,7 @@ fun RockbottomScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                "Bottom Depth (m)",
+                "Bottom depth (m)",
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.width(120.dp)
             )

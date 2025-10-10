@@ -58,7 +58,7 @@ fun AppNavGraph(nav: NavHostController) {
         composable(Route.Settings.path) {
             SettingsScreen(
                 onBack = { nav.popBackStack() },
-                //nav = nav
+                nav = nav
             )
         }
 

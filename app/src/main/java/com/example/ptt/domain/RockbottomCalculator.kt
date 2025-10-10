@@ -6,8 +6,6 @@ import kotlin.math.ceil
 object RockbottomCalculator {
 
     // ---- Eingabe- & Ergebnis-Typen ----
-
-    // Ein einzelner Stop
     data class Stop(val depthM: Int, val minutes: Int)
 
     // Variablen
@@ -16,7 +14,7 @@ object RockbottomCalculator {
         val switchDepthM: Int,
         val sacPerDiverLpm: Double,    // pro Taucher @1 ATA
         val stressFactor: Double,
-        val cylinderVolumeL: Int,   // z. B. 12
+        val cylinderL: Int,   // z. B. 12
         val divers: Int = 2,        // Anzahl Taucher zur Verbrauchsberechnung
         val ascentRateMpm: Int,
         val delayMin: Int=0,  // Verzögerung bis Aufstieg
@@ -31,8 +29,8 @@ object RockbottomCalculator {
 
     // Die Gesamtberechnung
     data class Result(
-        val totalGasL: Int,
-        val requiredBar: Int,
+        val totalGasL: Double,
+        val requiredBar: Double,
         val segments: List<Segment>
     )
 
@@ -46,41 +44,46 @@ object RockbottomCalculator {
         data class Hold(val atM: Int, val minutes: Int) : Leg   // Stopp (bei Tiefe)
     }
 
-    private fun buildLegs(delayMin: Int, bottomM: Int, switchM: Int, rawStops: List<Stop>): List<Leg> {
+    private fun buildLegs(
+        delayMin: Int,
+        bottomM: Int,
+        switchM: Int,
+        rawStops: List<Stop>
+    ): List<Leg> {
         require(bottomM >= switchM) { "Bottom depth must be >= switch depth" }
 
-        // defensive: nur Stops im Korridor, tief → flach
         val stops = rawStops
             .filter { it.depthM in switchM..bottomM }
             .sortedByDescending { it.depthM }
 
-
         val legs = mutableListOf<Leg>()
         var currentDepth = bottomM
 
-        // optionaler Verzögerungs-Abschnitt vor dem Aufstieg
+        // 🔹 optionaler Verzögerungs-Abschnitt vor dem Aufstieg
         if (delayMin > 0) {
             legs += Leg.Hold(atM = currentDepth, minutes = delayMin)
-
-            for (s in stops) {
-                if (s.depthM < currentDepth) {
-                    legs += Leg.Move(fromM = currentDepth, toM = s.depthM)
-                }
-                if (s.minutes > 0) {
-                    legs += Leg.Hold(atM = s.depthM, minutes = s.minutes)
-                }
-                currentDepth = s.depthM
-            }
-
-            // letzter Aufstieg bis zur Switch-Tiefe
-            if (switchM < currentDepth) {
-                legs += Leg.Move(fromM = currentDepth, toM = switchM)
-            }
         }
-            return legs
 
+        // 🔹 Aufstieg/Stops immer bauen – unabhängig von delayMin
+        for (s in stops) {
+            if (s.depthM < currentDepth) {
+                legs += Leg.Move(fromM = currentDepth, toM = s.depthM)
+            }
+            if (s.minutes > 0) {
+                legs += Leg.Hold(atM = s.depthM, minutes = s.minutes)
+            }
+            currentDepth = s.depthM
+        }
+
+        // 🔹 letzter Aufstieg bis zur Switch-Tiefe (immer)
+        if (switchM < currentDepth) {
+            legs += Leg.Move(fromM = currentDepth, toM = switchM)
+        }
+
+        return legs
     }
-        // ---- Phase 2: Legs auswerten – Physik/Mathematik ----
+
+    // ---- Phase 2: Legs auswerten – Physik/Mathematik ----
         private data class Params(
             val teamSacLpm: Double,
             val ascentRateMpm: Int,
@@ -138,8 +141,8 @@ object RockbottomCalculator {
                 }
             }
 
-            val totalL = ceil(total).toInt()                              // am Ende einmal runden
-            val bar = ceil(totalL / p.cylinderL.toDouble()).toInt()
+            val totalL = ceil(total).toDouble()                              // am Ende einmal runden
+            val bar = ceil(totalL / p.cylinderL.toDouble())
 
             return Result(
                 totalGasL = totalL,
@@ -160,7 +163,7 @@ object RockbottomCalculator {
             val params = Params(
                 teamSacLpm = inputs.sacPerDiverLpm * inputs.divers* inputs.stressFactor,
                 ascentRateMpm = inputs.ascentRateMpm,
-                cylinderL = inputs.cylinderVolumeL,
+                cylinderL = inputs.cylinderL,
 
             )
 

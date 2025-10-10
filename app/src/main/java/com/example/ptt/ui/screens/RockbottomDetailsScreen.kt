@@ -15,6 +15,8 @@ import androidx.activity.compose.LocalActivity
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 
 
 // RockbottomDetailsScreen.kt
@@ -51,14 +53,17 @@ fun RockbottomDetailsScreen(
         Spacer(Modifier.height(16.dp))
 
         // Parameter kurz oben
-        val sac = vm.sacPerDiver.toString().toDoubleOrNull() ?: 0.0
-        val teamSac = sac * 2
-        val ascent = vm.ascentRateMpm.toString().toIntOrNull() ?: 0
-        val delay = vm.delayMin.toString().toIntOrNull() ?: 0
+        val s = vm.settingsFlow.collectAsState().value
+        //val sac    = vm.sacPerDiver.toDoubleOrNull() ?: s.sacPerDiver.toDouble()
+        val ascent = vm.ascentRateMpm.toIntOrNull() ?: s.ascentRateMpm
+        val delayShown = vm.effectiveDelayMin()
+        val sacShown =vm.effectiveSac()
+        val teamSac = sacShown * 2
+
 
 
         Text(
-            text = String.format("SAC: %.1f × 2 = %.1f L/min", sac, teamSac),
+            text = String.format("SAC: %.1f × 2 = %.1f L/min", sacShown, teamSac),
             style = MaterialTheme.typography.bodySmall
         )
         Text(
@@ -67,7 +72,7 @@ fun RockbottomDetailsScreen(
         )
 
         Text(
-            text = "Delay: $delay min:",
+            text = String.format(java.util.Locale.GERMAN, "Delay: %d min", delayShown),
             style = MaterialTheme.typography.bodySmall,
             //modifier = Modifier.align(Alignment.Start)
         )
@@ -109,6 +114,7 @@ fun RockbottomDetailsScreen(
             }
 
             // 🔹 Summenzeile am Ende
+
             item {
                 Spacer(Modifier.height(8.dp))
                 HorizontalDivider()
@@ -124,25 +130,27 @@ fun RockbottomDetailsScreen(
 
             //  Herleitung Umrechnung in bar
             item {
-                //val gas = vm.calcGasL ?: 0
-                val cyl = vm.cylinderL.toIntOrNull() ?: 1
+                val cylShown = vm.effectiveCylinderL()
                 val bar = vm.calcBar ?: 0   // falls noch null, dann 0
+
 
                 Spacer(Modifier.height(8.dp))   // etwas Abstand zur vorherigen Zeile
 
+
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.End) {
                     Text(
-                        String.format(java.util.Locale.GERMAN, "÷ %d L", cyl),
+                        text = String.format(java.util.Locale.GERMAN, "÷ %d L", cylShown),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray,
-                        fontFamily = FontFamily.Monospace
-                    )
+                        fontFamily = FontFamily.Monospace)
+
                     Text(
                         String.format(java.util.Locale.GERMAN, "= %d bar", bar),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray,
                         fontFamily = FontFamily.Monospace
                     )
+
                 }
             }
 
@@ -150,6 +158,6 @@ fun RockbottomDetailsScreen(
 
 
         }
-        //String.format(java.util.Locale.GERMAN, "%.1f bar  %d ÷ %d L", bar, gas, cyl),
+
         }
     }
