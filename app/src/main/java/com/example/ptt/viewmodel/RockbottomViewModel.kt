@@ -161,6 +161,7 @@ class RockbottomViewModel : ViewModel() {   // erbt von ViewModel
 
             val s = SettingsRepository.settings.value
 
+            // Stringeingaben Parsen
             val sac = parseDoubleOrNullIfNotBlank(sacPerDiver) ?: s.sacPerDiver
             val cyl = parseIntOrNullIfNotBlank(cylinderL) ?: s.cylinderL
             val rate = parseIntOrNullIfNotBlank(ascentRateMpm) ?: s.ascentRateMpm

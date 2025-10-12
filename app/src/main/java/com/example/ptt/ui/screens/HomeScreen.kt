@@ -14,8 +14,10 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun HomeScreen(
     onDeepstop: () -> Unit,
+    onConsumption: () -> Unit,
     onRockbottom: () -> Unit,
     onSettings: () -> Unit
+
 ) {
     Column(
         modifier = Modifier
@@ -34,6 +36,14 @@ fun HomeScreen(
             onClick = onDeepstop,
             modifier = Modifier.width(240.dp).height(56.dp)
         ) { Text("Deepstop Calculator") }
+
+        Spacer(Modifier.height(16.dp))
+
+        OutlinedButton(
+            onClick = onConsumption,
+            modifier = Modifier.width(240.dp).height(56.dp)
+        ) { Text("Consumption Calculator") }
+
 
         Spacer(Modifier.height(16.dp))
 
