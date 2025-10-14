@@ -34,6 +34,14 @@ class ConsumptionViewModel : ViewModel() {   // erbt von ViewModel
     // Liste der Level als State
     val levels = mutableStateListOf<Level>()
 
+    // Hieraus wird ein ConsumptionModel erzeugt, dass durch den CalculateBottom berechnet wird
+    var lastBuiltModel by mutableStateOf<ConsumptionModel?>(null)
+
+
+    fun setLastBuilt(model: ConsumptionModel?) {
+        lastBuiltModel = model
+    }
+
     // Wird benötigt, um die Stringwerte zu Parsen
     fun buildConsumptionModelOrNull(): ConsumptionModel? {
         val start = fillingPressureBar.toDoubleOrNullDe() ?: return null
@@ -179,7 +187,6 @@ class ConsumptionViewModel : ViewModel() {   // erbt von ViewModel
         }
         return used
     }
-
 
 }
 

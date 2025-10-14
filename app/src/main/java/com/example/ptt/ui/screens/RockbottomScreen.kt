@@ -115,7 +115,7 @@ fun RockbottomScreen(
 
                     Spacer(Modifier.width(75.dp))
 
-                    // Depth column
+                    // Depth colum
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.width(100.dp)

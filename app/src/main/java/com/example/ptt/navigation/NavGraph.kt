@@ -5,6 +5,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.ptt.ui.screens.*
+import com.example.ptt.ui.screens.ConsumptionResultScreen
+
 
 sealed class Route(val path: String) {
     data object Home : Route("home")
@@ -14,6 +16,7 @@ sealed class Route(val path: String) {
     data object RockbottomDetails : Route("rockbottom_details")
 
     data object Consumption : Route("consumption")
+    data object ConsumptionResult : Route("consumption/result")
     data object Settings : Route("settings")
 }
 
@@ -60,8 +63,16 @@ fun AppNavGraph(nav: NavHostController) {
             )
         }
 
-        composable(Route.Settings.path) {
+        composable(Route.Consumption.path) {
             ConsumptionScreen(
+                onBack = { nav.popBackStack() },
+                onShowResult = { nav.navigate(Route.ConsumptionResult.path) }
+            )
+        }
+
+        composable(Route.ConsumptionResult.path) {
+            // Falls du den Result-Screen noch nicht hast, vorerst ein Platzhalter
+            ConsumptionResultScreen(
                 onBack = { nav.popBackStack() },
                 nav = nav
             )
