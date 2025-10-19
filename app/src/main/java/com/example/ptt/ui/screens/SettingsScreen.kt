@@ -63,6 +63,14 @@ fun SettingsScreen(
 
         Spacer(Modifier.height(16.dp))
 
+        // Fülldruck (Int)
+        SettingRowInt(
+            label = "Filling Pressure(L)",
+            value = settings.fillingPressure,
+        ) { v -> SettingsRepository.update { it.copy(fillingPressure = v) } }
+
+        Spacer(Modifier.height(16.dp))
+
         // Stress factor (Double)
         SettingRowDouble(
             label = "Stress factor",

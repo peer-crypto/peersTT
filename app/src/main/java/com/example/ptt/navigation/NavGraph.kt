@@ -5,7 +5,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.ptt.ui.screens.*
-import com.example.ptt.ui.screens.ConsumptionResultScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
+
+
 
 
 sealed class Route(val path: String) {
@@ -16,11 +18,11 @@ sealed class Route(val path: String) {
     data object RockbottomDetails : Route("rockbottom_details")
 
     data object Consumption : Route("consumption")
-    data object ConsumptionResult : Route("consumption/result")
+    data object ConsumptionResult : Route("consumption_result")
+
+    data object ConsumptionDetails : Route("consumption_details")
     data object Settings : Route("settings")
 }
-
-
 
 @Composable
 fun AppNavGraph(nav: NavHostController) {
@@ -62,19 +64,34 @@ fun AppNavGraph(nav: NavHostController) {
                 nav = nav
             )
         }
-
-        composable(Route.Consumption.path) {
+        composable(Route.Consumption.path) { backStackEntry ->
+            val vm: com.example.ptt.viewmodel.ConsumptionViewModel =
+                viewModel(backStackEntry)
             ConsumptionScreen(
+                vm = vm,
                 onBack = { nav.popBackStack() },
                 onShowResult = { nav.navigate(Route.ConsumptionResult.path) }
             )
         }
 
         composable(Route.ConsumptionResult.path) {
-            // Falls du den Result-Screen noch nicht hast, vorerst ein Platzhalter
+            val owner = nav.getBackStackEntry(Route.Consumption.path)
+            val vm: com.example.ptt.viewmodel.ConsumptionViewModel =
+                viewModel(owner)
             ConsumptionResultScreen(
+                vm = vm,
                 onBack = { nav.popBackStack() },
-                nav = nav
+                onShowDetails = { nav.navigate(Route.ConsumptionDetails.path) }
+            )
+        }
+
+        composable(Route.ConsumptionDetails.path) {
+            val owner = nav.getBackStackEntry(Route.Consumption.path)
+            val vm: com.example.ptt.viewmodel.ConsumptionViewModel =
+                viewModel(owner)
+            ConsumptionDetailsScreen(
+                vm = vm,
+                onBack = { nav.popBackStack() }
             )
         }
 

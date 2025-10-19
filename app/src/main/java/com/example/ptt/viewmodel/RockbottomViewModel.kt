@@ -183,7 +183,7 @@ class RockbottomViewModel : ViewModel() {   // erbt von ViewModel
                     switchDepthM = switch,
                     sacPerDiverLpm = sac,      // Double
                     stressFactor = stress,   // Double
-                    cylinderL = cyl,      // Int
+                    cylinderL = cyl,      // noch Int !!!
                     ascentRateMpm = rate,     // Int
                     delayMin = delay,    // Int
                     stopsBeforeSwitch = stops
