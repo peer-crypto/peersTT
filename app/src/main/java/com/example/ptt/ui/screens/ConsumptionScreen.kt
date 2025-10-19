@@ -1,7 +1,5 @@
 package com.example.ptt.ui.screens
 
-
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
@@ -27,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.example.ptt.ui.components.CompactNumberField
 import com.example.ptt.viewmodel.ConsumptionViewModel
 import com.example.ptt.ui.input.toDoubleOrNullDe
-import androidx.compose.ui.draw.alpha
+
 
 
 @Composable
@@ -64,9 +61,11 @@ fun ConsumptionScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextButton(onClick = onBack) { Text("‹ Back") }
-            Text("Consumption Calculator", style = MaterialTheme.typography.titleLarge)
+            Text("Consumption-Calculator", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.width(48.dp))
         }
+
+
 
         Spacer(Modifier.height(12.dp))
 
@@ -95,19 +94,20 @@ fun ConsumptionScreen(
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth()
+                .fillMaxWidth()
+                .weight(1f, fill = false)
         ) {
 
             vm.levels.forEachIndexed { i, lvl ->
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxWidth(),
-                )
-
-                {
+                ) {
 
                     Spacer(Modifier.width(75.dp))
+
 
                     // Depht Column
                     Column(
@@ -142,10 +142,12 @@ fun ConsumptionScreen(
                             onValueChange = {},
                         )
                     }
-                    IconButton(onClick = { vm.removeLevel(i) }) {
+
+                    //Spacer(Modifier.width(12.dp)) // Abstand zum Delete-Button
+                    IconButton(onClick = { vm.removeLevel(i)}) {
                         Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = "Remove stop"
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Remove Level"
                         )
                     }
                 }
@@ -154,7 +156,6 @@ fun ConsumptionScreen(
 
 // 2) Eingabezeile
         Spacer(Modifier.height(8.dp))
-        val isError = reject is ConsumptionViewModel.Fit.Rejected
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -181,7 +182,7 @@ fun ConsumptionScreen(
                 )
             }
 
-            Spacer(Modifier.width(5.dp)) // Abstand zwischen Depth und Minutes
+            Spacer(Modifier.width(8.dp)) // Abstand zwischen Depth und Minutes
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -197,18 +198,6 @@ fun ConsumptionScreen(
                     onValueChange = { nextMinutes = it; reject = null },
                 )
             }
-
-            // Dummy, um gleiche Breite zu erreichen
-            IconButton(
-                onClick = { /* no-op */ },
-                enabled = false,
-                modifier = Modifier
-                    .size(48.dp)   // gleiche Touch-Target-Breite wie „echter“ Papierkorb
-                    .alpha(0f)     // unsichtbar
-            ) {
-                Icon(Icons.Filled.Delete, contentDescription = null)
-            }
-
         }
 // 3) Add-Button (unter der Eingabezeile)
         Spacer(Modifier.height(8.dp))

@@ -149,7 +149,8 @@ fun RockbottomScreen(
 
                     Spacer(Modifier.width(12.dp)) // Abstand zum Delete-Button
                     IconButton(onClick = { vm.removeDecoStop(index) }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Remove stop")
+                        Icon(Icons.Default.Delete,
+                            contentDescription = "Remove stop")
                     }
                 }
             }
