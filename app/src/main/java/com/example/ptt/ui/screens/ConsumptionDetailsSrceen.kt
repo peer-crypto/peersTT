@@ -10,13 +10,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import com.example.ptt.domain.ConsumptionCalculator
 import kotlin.math.ceil
 
 import java.util.Locale
+
+fun fmt1(v: Double) = String.format(Locale.getDefault(), "%.0f", v)
+fun fmt2(v: Double) = String.format(Locale.getDefault(), "%.2f", v)
+
+
 
 
 @Composable
@@ -26,8 +31,21 @@ fun ConsumptionDetailsScreen(
 
 ) {
 
-    val model = vm.lastBuiltModel
-    if (model == null) {
+    val summary = vm.lastSummary
+
+    val model = vm.lastBuiltModel ?: run {
+        // kurze Info und raus
+        Column(Modifier
+            .fillMaxSize()
+            .padding(16.dp)) {
+            Text("Keine Berechnung vorhanden. Bitte zuerst Calculate im Consumption-Screen.")
+        }
+        return
+    }
+
+    val details = ConsumptionCalculator.deriveDetails(model)
+
+    if (summary == null) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -38,7 +56,7 @@ fun ConsumptionDetailsScreen(
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
                 IconButton(onClick = onBack) {
                     Icon(
-                        Icons.Filled.ArrowBack,
+                        Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back"
                     )
                 }
@@ -50,8 +68,6 @@ fun ConsumptionDetailsScreen(
         }
         return
     }
-
-    val details = ConsumptionCalculator.deriveDetails(model)
 
     Column(
         modifier = Modifier
@@ -81,11 +97,17 @@ fun ConsumptionDetailsScreen(
         val ascent = cfg?.ascentRateMpm ?: 0.0
         val descent = cfg?.descentRateMpm ?: 0.0
         val cyl = cfg?.cylinderVolumeL ?: 0.0
+        val startBar = model?.startBar ?: 0.0
+
+
+
+
 
         Text(
             text = String.format("SAC: %.1f L", sac),
             style = MaterialTheme.typography.bodySmall
         )
+
         Text(
             text = "Ascent: $ascent m/min",
             style = MaterialTheme.typography.bodySmall
@@ -102,7 +124,7 @@ fun ConsumptionDetailsScreen(
         )
 
         Text(
-            text = "Filling Pressure: $cyl L",
+            text = "Filling pressure: $startBar bar",
             style = MaterialTheme.typography.bodySmall
         )
 
@@ -111,10 +133,11 @@ fun ConsumptionDetailsScreen(
         val summary = vm.lastSummary
         val model = vm.lastBuiltModel
 
-        val totalLitersExact = summary?.usedLiters ?: 0.0
-        val totalLitersUp = kotlin.math.ceil(totalLitersExact).toInt()
+        val usedLiters = summary?.usedLiters ?: 0.0
+        val usedBarExact    = summary?.usedBar ?: 0.0
+        val remainingBar = summary?.remainingBar ?: 0.0
         val cylL = model?.settings?.cylinderVolumeL ?: 1.0
-        val totalBarExact = totalLitersExact / cylL
+
 
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -194,12 +217,26 @@ fun ConsumptionDetailsScreen(
                 HorizontalDivider()
                 Spacer(Modifier.height(8.dp))
 
-                Row(
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalAlignment = Alignment.Start
                 ) {
-                    Text("Total gas:", style = MaterialTheme.typography.titleMedium)
-                    Text("$totalLitersUp L", style = MaterialTheme.typography.titleMedium)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Total gas:", style = MaterialTheme.typography.titleMedium)
+                        Text("${fmt1(usedLiters)} L", style = MaterialTheme.typography.titleMedium)
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Remaining bar:", style = MaterialTheme.typography.titleMedium)
+                        Text("${fmt1(remainingBar)} bar", style = MaterialTheme.typography.titleMedium)
+                    }
+
                 }
 
                 Spacer(Modifier.height(8.dp))
@@ -208,31 +245,23 @@ fun ConsumptionDetailsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.End
                 ) {
+                    // 1) Liter → bar
                     Text(
-                        text = "÷ %s L".format(
-                            String.format(
-                                Locale.getDefault(),
-                                "%.1f",
-                                cylL
-                            )
-                        ),
+                        text = "${usedLiters} L ÷ ${fmt1(cylL)} L = ${fmt1(usedBarExact)} bar",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray,
                         fontFamily = FontFamily.Monospace
                     )
+
+                    // 2) Startdruck – Verbrauch = Restdruck
                     Text(
-                        text = "= %s bar".format(
-                            String.format(
-                                Locale.getDefault(),
-                                "%.2f",
-                                totalBarExact
-                            )
-                        ),
+                        text = "${fmt1(startBar)} bar − ${fmt1(usedBarExact)} bar = ${fmt1(remainingBar)} bar",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray,
                         fontFamily = FontFamily.Monospace
                     )
                 }
+
             }
         }
     }

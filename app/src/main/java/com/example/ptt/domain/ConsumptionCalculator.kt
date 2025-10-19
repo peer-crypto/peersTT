@@ -47,33 +47,35 @@ object ConsumptionCalculator {
      * Erzeugt eine Folge von Legs: Move(0->d1), Level@d1, Move(d1->d2), Level@d2, ...
      */
     fun deriveDetails(model: ConsumptionModel): ConsumptionDetails {
-        val s: SettingsSnapshot = model.settings
+        val s = model.settings
         val legs = mutableListOf<Leg>()
         var last = 0.0
 
         for (lvl in model.levels) {
             // Move last -> lvl.depthM
-            val (moveGas,
-                moveTime) = moveGasLiters(last, lvl.depthM, s)
-
+            val (moveGas, moveTime) = moveGasLiters(last, lvl.depthM, s)
             if (moveTime > 0.0 || moveGas > 0.0) {
+                val avgAta = ata((last + lvl.depthM) / 2.0)
+                val rate   = if (lvl.depthM < last) s.ascentRateMpm else s.descentRateMpm
+
                 legs += Leg.MoveLeg(
                     fromM = last,
                     toM = lvl.depthM,
                     timeMin = moveTime,
                     gasL = moveGas,
-                    avgAta = ata((last + lvl.depthM) / 2.0)
-                )
+                    avgAta = avgAta
 
+                )
             }
 
             // Level
-            val levelGas = s.sacLpm * ata(lvl.depthM) * lvl.durationMin
+            val levelAta = ata(lvl.depthM)
+            val levelGas = s.sacLpm * levelAta * lvl.durationMin
             legs += Leg.LevelLeg(
                 depthM = lvl.depthM,
                 minutes = lvl.durationMin,
                 gasL = levelGas,
-                ata= ata(lvl.depthM)
+                ata = levelAta
             )
 
             last = lvl.depthM
@@ -82,4 +84,5 @@ object ConsumptionCalculator {
         val summary = summarize(model)
         return ConsumptionDetails(legs = legs, summary = summary)
     }
+
 }

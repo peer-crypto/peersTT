@@ -8,7 +8,7 @@ data class SettingsSnapshot(
     val sacLpm: Double,
     val ascentRateMpm: Double,
     val descentRateMpm: Double,
-    val cylinderVolumeL: Double
+    val cylinderVolumeL: Double,
 )
 
 data class ConsumptionModel(

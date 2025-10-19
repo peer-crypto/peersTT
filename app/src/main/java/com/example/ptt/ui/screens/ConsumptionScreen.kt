@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.example.ptt.ui.components.CompactNumberField
 import com.example.ptt.viewmodel.ConsumptionViewModel
 import com.example.ptt.ui.input.toDoubleOrNullDe
+import androidx.compose.ui.draw.alpha
 
 
 @Composable
@@ -35,10 +37,15 @@ fun ConsumptionScreen(
     vm: com.example.ptt.viewmodel.ConsumptionViewModel
 ) {
 
-    var nextDepth by remember { mutableStateOf("") }
-    var nextMinutes by remember { mutableStateOf("") }
+    var nextDepth by remember(vm.levels.size) {
+        mutableStateOf(vm.defaultDepthStrOrEmpty())
+    }
+    var nextMinutes by remember(vm.levels.size) {
+        mutableStateOf(vm.defaultMinutesStrOrEmpty())
+    }
     var reject: ConsumptionViewModel.Fit.Rejected? by remember { mutableStateOf(null) }
     val isError = reject is ConsumptionViewModel.Fit.Rejected
+
 
 
     Column(
@@ -170,6 +177,7 @@ fun ConsumptionScreen(
                 CompactNumberField(
                     value = nextDepth,
                     onValueChange = { nextDepth = it; reject = null },
+
                 )
             }
 
@@ -189,6 +197,18 @@ fun ConsumptionScreen(
                     onValueChange = { nextMinutes = it; reject = null },
                 )
             }
+
+            // Dummy, um gleiche Breite zu erreichen
+            IconButton(
+                onClick = { /* no-op */ },
+                enabled = false,
+                modifier = Modifier
+                    .size(48.dp)   // gleiche Touch-Target-Breite wie „echter“ Papierkorb
+                    .alpha(0f)     // unsichtbar
+            ) {
+                Icon(Icons.Filled.Delete, contentDescription = null)
+            }
+
         }
 // 3) Add-Button (unter der Eingabezeile)
         Spacer(Modifier.height(8.dp))
@@ -198,15 +218,13 @@ fun ConsumptionScreen(
                 val d = nextDepth.toDoubleOrNullDe()
                 val t = nextMinutes.toDoubleOrNullDe()
                 if (d == null || t == null) {
-                    reject = ConsumptionViewModel.Fit.Rejected; return@Button
+                    reject = ConsumptionViewModel.Fit.Rejected;
+                    return@Button
                 }
                 when (vm.canAddAnotherLevel(d, t)) {
                     ConsumptionViewModel.Fit.Full -> {
                         vm.addLevel(d, t)
                         reject = null
-                        nextDepth =
-                            ""      // neue leere Zeile „erscheint“ (gleiches Feld, nur geleert)
-                        nextMinutes = ""
                     }
 
                     ConsumptionViewModel.Fit.Rejected -> reject =
@@ -222,18 +240,9 @@ fun ConsumptionScreen(
             enabled = vm.settingsSnapshot != null && vm.levels.isNotEmpty(),
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-                val model = vm.buildConsumptionModelOrNull()
-                if (model != null) {
-                    vm.setLastBuilt(model)   // statt vm.lastBuiltModel = model (falls private set)
-                    onShowResult()
-                } else {
-                    reject = ConsumptionViewModel.Fit.Rejected
-                }
                 if (vm.buildAndSummarize()) {
-                    Log.d("PTT", "buildAndSummarize OK - model=${vm.lastBuiltModel}, summary=${vm.lastSummary}")
                     onShowResult()
                 } else {
-                    Log.d("PTT", "buildAndSummarize FAILED")
                     reject = ConsumptionViewModel.Fit.Rejected
                 }
             }

@@ -30,10 +30,24 @@ class ConsumptionViewModel : ViewModel() {   // erbt von ViewModel
     var lastBuiltModel by mutableStateOf<ConsumptionModel?>(null)
         private set
 
+    // Defaultwerte bei leerer Liste
+    object Defaults {
+        const val DEPTH_M  = 6.0
+        const val MINUTES  = 10.0
+    }
+    // true, wenn die Defaults vorgeschlagen werden sollen
+    fun shouldPrefillDefaults(): Boolean = levels.isEmpty()
+
+    fun defaultDepthStrOrEmpty(): String =
+        if (shouldPrefillDefaults()) Defaults.DEPTH_M.toInt().toString() else ""
+
+    fun defaultMinutesStrOrEmpty(): String =
+        if (shouldPrefillDefaults()) Defaults.MINUTES.toInt().toString() else ""
 
     fun setLastBuilt(model: ConsumptionModel?) {
         lastBuiltModel = model
     }
+
 
     // Wird benötigt, um die Stringwerte zu Parsen
     fun buildConsumptionModelOrNull(): ConsumptionModel? {
@@ -63,7 +77,7 @@ class ConsumptionViewModel : ViewModel() {   // erbt von ViewModel
             sacLpm = s.sacPerDiver,
             ascentRateMpm = s.ascentRateMpm.toDouble(),
             descentRateMpm = s.descentRateMpm.toDouble(),
-            cylinderVolumeL = s.cylinderL.toDouble()
+            cylinderVolumeL = s.cylinderL.toDouble(),
         )
     }
 
