@@ -16,14 +16,14 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import com.example.ptt.ui.format.*
 
 
 // RockbottomDetailsScreen.kt
 @Composable
 fun RockbottomDetailsScreen(
     onBack: () -> Unit,
-    nav: NavHostController,
+
 ) {
     // shared VM vom Rockbottom-Backstack holen
     val activity = LocalActivity.current as ComponentActivity
@@ -141,7 +141,7 @@ fun RockbottomDetailsScreen(
 
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.End) {
                     Text(
-                        text = String.format(java.util.Locale.GERMAN, "÷ %d L", cylShown),
+                        text = "÷ ${fmt1(cylShown)} L",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray,
                         fontFamily = FontFamily.Monospace)
@@ -155,10 +155,6 @@ fun RockbottomDetailsScreen(
 
                 }
             }
-
-
-
-
         }
 
         }

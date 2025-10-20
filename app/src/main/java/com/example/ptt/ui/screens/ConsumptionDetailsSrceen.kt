@@ -15,14 +15,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import com.example.ptt.domain.ConsumptionCalculator
 import kotlin.math.ceil
+import com.example.ptt.ui.format.*
 
 import java.util.Locale
-
-fun fmt1(v: Double) = String.format(Locale.getDefault(), "%.0f", v)
-fun fmt2(v: Double) = String.format(Locale.getDefault(), "%.2f", v)
-
-
-
 
 @Composable
 fun ConsumptionDetailsScreen(
@@ -100,9 +95,6 @@ fun ConsumptionDetailsScreen(
         val startBar = model?.startBar ?: 0.0
 
 
-
-
-
         Text(
             text = String.format("SAC: %.1f L", sac),
             style = MaterialTheme.typography.bodySmall
@@ -157,14 +149,13 @@ fun ConsumptionDetailsScreen(
                     ) {
                         when (leg) {
                             is ConsumptionCalculator.Leg.MoveLeg -> {
-                                val direction = if (leg.toM < leg.fromM) "Ascent" else "Descent"
+                                val direction = if (leg.toM < leg.fromM) "Asc" else "Desc"
 
                                 Column {
                                     Text(
                                         "${idx + 1}: $direction ${leg.fromM} → ${leg.toM} m",
                                         style = MaterialTheme.typography.bodyLarge
                                     )
-
 
                                     Text(
                                         String.format(
@@ -226,7 +217,7 @@ fun ConsumptionDetailsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text("Total gas:", style = MaterialTheme.typography.titleMedium)
-                        Text("${fmt1(usedLiters)} L", style = MaterialTheme.typography.titleMedium)
+                        Text("${fmt0(usedLiters)} L", style = MaterialTheme.typography.titleMedium)
                     }
 
                     Row(
@@ -234,7 +225,7 @@ fun ConsumptionDetailsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text("Remaining bar:", style = MaterialTheme.typography.titleMedium)
-                        Text("${fmt1(remainingBar)} bar", style = MaterialTheme.typography.titleMedium)
+                        Text("${fmt0(remainingBar)} bar", style = MaterialTheme.typography.titleMedium)
                     }
 
                 }
@@ -247,7 +238,7 @@ fun ConsumptionDetailsScreen(
                 ) {
                     // 1) Liter → bar
                     Text(
-                        text = "${usedLiters} L ÷ ${fmt1(cylL)} L = ${fmt1(usedBarExact)} bar",
+                        text = "${fmt0(usedLiters)} L ÷ ${fmt1(cylL)} L = ${fmt0(usedBarExact)} bar",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray,
                         fontFamily = FontFamily.Monospace
@@ -255,7 +246,7 @@ fun ConsumptionDetailsScreen(
 
                     // 2) Startdruck – Verbrauch = Restdruck
                     Text(
-                        text = "${fmt1(startBar)} bar − ${fmt1(usedBarExact)} bar = ${fmt1(remainingBar)} bar",
+                        text = "${fmt0(startBar)} bar − ${fmt0(usedBarExact)} bar = ${fmt0(remainingBar)} bar",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray,
                         fontFamily = FontFamily.Monospace

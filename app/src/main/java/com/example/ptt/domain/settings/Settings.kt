@@ -5,6 +5,6 @@ data class Settings(
     val stressFactor: Double = 2.0,
     val ascentRateMpm: Int = 15,
     val descentRateMpm: Int = 20,
-    val cylinderL: Int = 24,
+    val cylinderL: Double = 24.0,
     val delayMin: Int = 2
 )

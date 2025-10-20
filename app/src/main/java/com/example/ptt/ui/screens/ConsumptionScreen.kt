@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
@@ -144,9 +146,11 @@ fun ConsumptionScreen(
                     }
 
                     //Spacer(Modifier.width(12.dp)) // Abstand zum Delete-Button
-                    IconButton(onClick = { vm.removeLevel(i)}) {
+                    IconButton(onClick = { vm.removeLevel(i)},
+                            modifier = Modifier.requiredSize(56.dp) ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
+                            modifier = Modifier.size(20.dp),
                             contentDescription = "Remove Level"
                         )
                     }
@@ -207,7 +211,7 @@ fun ConsumptionScreen(
                 val d = nextDepth.toDoubleOrNullDe()
                 val t = nextMinutes.toDoubleOrNullDe()
                 if (d == null || t == null) {
-                    reject = ConsumptionViewModel.Fit.Rejected;
+                    reject = ConsumptionViewModel.Fit.Rejected
                     return@Button
                 }
                 when (vm.canAddAnotherLevel(d, t)) {

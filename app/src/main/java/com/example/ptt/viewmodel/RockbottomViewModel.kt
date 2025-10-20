@@ -163,7 +163,7 @@ class RockbottomViewModel : ViewModel() {   // erbt von ViewModel
 
             // Stringeingaben Parsen
             val sac = parseDoubleOrNullIfNotBlank(sacPerDiver) ?: s.sacPerDiver
-            val cyl = parseIntOrNullIfNotBlank(cylinderL) ?: s.cylinderL
+            val cyl = parseDoubleOrNullIfNotBlank(cylinderL) ?: s.cylinderL
             val rate = parseIntOrNullIfNotBlank(ascentRateMpm) ?: s.ascentRateMpm
             val delay = parseIntOrNullIfNotBlank(delayMin) ?: s.delayMin
             val stress = parseDoubleOrNullIfNotBlank(stressFactor) ?: s.stressFactor
@@ -196,9 +196,9 @@ class RockbottomViewModel : ViewModel() {   // erbt von ViewModel
         }
 
     // Variablenumformung für DetailsScreen
-    fun effectiveCylinderL(): Int {
+    fun effectiveCylinderL(): Double {
         val s = SettingsRepository.settings.value
-        return cylinderL.trim().toIntOrNull() ?: s.cylinderL
+        return cylinderL.trim().toDoubleOrNull() ?: s.cylinderL
     }
 
     fun effectiveDelayMin(): Int {

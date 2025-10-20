@@ -22,10 +22,8 @@ import com.example.ptt.ui.components.CompactNumberField
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
-    nav: NavHostController
 ) {
     val settings by SettingsRepository.settings.collectAsState()
-    val back = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     val focus = LocalFocusManager.current
 
 
@@ -55,8 +53,8 @@ fun SettingsScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        // Cylinder (Int)
-        SettingRowInt(
+        // Cylinder (Double)
+        SettingRowDouble(
             label = "Cylinder (L)",
             value = settings.cylinderL
         ) { v -> SettingsRepository.update { it.copy(cylinderL = v) } }

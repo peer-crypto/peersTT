@@ -14,10 +14,10 @@ object RockbottomCalculator {
         val switchDepthM: Int,
         val sacPerDiverLpm: Double,    // pro Taucher @1 ATA
         val stressFactor: Double,
-        val cylinderL: Int,   // z. B. 12
+        val cylinderL: Double,
         val divers: Int = 2,        // Anzahl Taucher zur Verbrauchsberechnung
         val ascentRateMpm: Int,
-        val delayMin: Int=0,  // Verzögerung bis Aufstieg
+        val delayMin: Int =0,  // Verzögerung bis Aufstieg
         val stopsBeforeSwitch: List<Stop>
     )
 
@@ -85,9 +85,9 @@ object RockbottomCalculator {
 
     // ---- Phase 2: Legs auswerten – Physik/Mathematik ----
         private data class Params(
-            val teamSacLpm: Double,
-            val ascentRateMpm: Int,
-            val cylinderL: Int,
+        val teamSacLpm: Double,
+        val ascentRateMpm: Int,
+        val cylinderL: Double,
         )
 
         private fun evaluate(legs: List<Leg>, p: Params): Result {
@@ -98,11 +98,6 @@ object RockbottomCalculator {
             // Für Double-Werte
             fun fmt(d: Double, decimals: Int = 1): String =
                 String.format(java.util.Locale.GERMAN, "%.${decimals}f", d)
-
-            // Überladung für Int-Werte
-            fun fmt(d: Int, decimals: Int = 0): String =
-                fmt(d.toDouble(), decimals)
-
 
             fun addSeg(label: String, gas: Double, formula: String) {
                 val g = kotlin.math.ceil(gas).toInt()   // Anzeige aufrunden
