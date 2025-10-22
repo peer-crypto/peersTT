@@ -8,8 +8,6 @@ import com.example.ptt.ui.screens.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 
-
-
 sealed class Route(val path: String) {
     data object Home : Route("home")
     data object Deepstop : Route("deepstop")
@@ -54,14 +52,14 @@ fun AppNavGraph(nav: NavHostController) {
         composable(Route.RockbottomDetails.path) {
             RockbottomDetailsScreen(
                 onBack = { nav.popBackStack() },
-                nav = nav
+
             )
         }
 
         composable(Route.Settings.path) {
             SettingsScreen(
                 onBack = { nav.popBackStack() },
-                nav = nav
+
             )
         }
         composable(Route.Consumption.path) { backStackEntry ->

@@ -24,7 +24,7 @@ import com.example.ptt.ui.format.*
 fun RockbottomDetailsScreen(
     onBack: () -> Unit,
 
-) {
+    ) {
     // shared VM vom Rockbottom-Backstack holen
     val activity = LocalActivity.current as ComponentActivity
     val vm: RockbottomViewModel = viewModel(activity)
@@ -57,7 +57,7 @@ fun RockbottomDetailsScreen(
         //val sac    = vm.sacPerDiver.toDoubleOrNull() ?: s.sacPerDiver.toDouble()
         val ascent = vm.ascentRateMpm.toIntOrNull() ?: s.ascentRateMpm
         val delayShown = vm.effectiveDelayMin()
-        val sacShown =vm.effectiveSac()
+        val sacShown = vm.effectiveSac()
         val factorShown = vm.effectivStressFactor()
         val teamSac = sacShown * 2 * factorShown
 
@@ -65,7 +65,12 @@ fun RockbottomDetailsScreen(
 
 
         Text(
-            text = String.format("Team-SAC: %.1f × %.1f × 2 = %.1f L/min", sacShown,factorShown, teamSac),
+            text = String.format(
+                "Team-SAC: %.1f × %.1f × 2 = %.1f L/min",
+                sacShown,
+                factorShown,
+                teamSac
+            ),
             style = MaterialTheme.typography.bodySmall
         )
         Text(
@@ -121,6 +126,7 @@ fun RockbottomDetailsScreen(
                 Spacer(Modifier.height(8.dp))
                 HorizontalDivider()
                 Spacer(Modifier.height(8.dp))
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -133,29 +139,26 @@ fun RockbottomDetailsScreen(
             //  Herleitung Umrechnung in bar
             item {
                 val cylShown = vm.effectiveCylinderL()
-                val bar = vm.calcBar ?: 0   // falls noch null, dann 0
-
-
-                Spacer(Modifier.height(8.dp))   // etwas Abstand zur vorherigen Zeile
-
 
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.End) {
                     Text(
                         text = "÷ ${fmt1(cylShown)} L",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray,
-                        fontFamily = FontFamily.Monospace)
-
-                    Text(
-                        String.format(java.util.Locale.GERMAN, "= %d bar", bar),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray,
                         fontFamily = FontFamily.Monospace
                     )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Reqired pressure:", style = MaterialTheme.typography.titleMedium)
+                        Text("${vm.calcBar} bar", style = MaterialTheme.typography.titleMedium)
+                    }
 
                 }
             }
         }
 
-        }
     }
+}

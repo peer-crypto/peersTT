@@ -28,7 +28,6 @@ import com.example.ptt.viewmodel.ConsumptionViewModel
 import com.example.ptt.ui.input.toDoubleOrNullDe
 
 
-
 @Composable
 fun ConsumptionScreen(
     onBack: () -> Unit,
@@ -95,7 +94,8 @@ fun ConsumptionScreen(
 //  Bereits hinzugefügte Stops
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .fillMaxWidth()
                 .weight(1f, fill = false)
         ) {
@@ -146,8 +146,10 @@ fun ConsumptionScreen(
                     }
 
                     //Spacer(Modifier.width(12.dp)) // Abstand zum Delete-Button
-                    IconButton(onClick = { vm.removeLevel(i)},
-                            modifier = Modifier.requiredSize(56.dp) ) {
+                    IconButton(
+                        onClick = { vm.removeLevel(i) },
+                        modifier = Modifier.requiredSize(56.dp)
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
                             modifier = Modifier.size(20.dp),
@@ -183,7 +185,7 @@ fun ConsumptionScreen(
                     value = nextDepth,
                     onValueChange = { nextDepth = it; reject = null },
 
-                )
+                    )
             }
 
             Spacer(Modifier.width(8.dp)) // Abstand zwischen Depth und Minutes

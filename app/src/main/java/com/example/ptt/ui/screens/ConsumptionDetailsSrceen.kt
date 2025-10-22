@@ -16,7 +16,6 @@ import androidx.compose.ui.text.font.FontFamily
 import com.example.ptt.domain.ConsumptionCalculator
 import kotlin.math.ceil
 import com.example.ptt.ui.format.*
-
 import java.util.Locale
 
 @Composable
@@ -30,9 +29,11 @@ fun ConsumptionDetailsScreen(
 
     val model = vm.lastBuiltModel ?: run {
         // kurze Info und raus
-        Column(Modifier
-            .fillMaxSize()
-            .padding(16.dp)) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
             Text("Keine Berechnung vorhanden. Bitte zuerst Calculate im Consumption-Screen.")
         }
         return
@@ -126,7 +127,7 @@ fun ConsumptionDetailsScreen(
         val model = vm.lastBuiltModel
 
         val usedLiters = summary?.usedLiters ?: 0.0
-        val usedBarExact    = summary?.usedBar ?: 0.0
+        val usedBarExact = summary?.usedBar ?: 0.0
         val remainingBar = summary?.remainingBar ?: 0.0
         val cylL = model?.settings?.cylinderVolumeL ?: 1.0
 
@@ -198,7 +199,6 @@ fun ConsumptionDetailsScreen(
                             }
                         }
                     }
-
                 }
             }
 
@@ -225,9 +225,11 @@ fun ConsumptionDetailsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text("Remaining bar:", style = MaterialTheme.typography.titleMedium)
-                        Text("${fmt0(remainingBar)} bar", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "${fmt0(remainingBar)} bar",
+                            style = MaterialTheme.typography.titleMedium
+                        )
                     }
-
                 }
 
                 Spacer(Modifier.height(8.dp))
@@ -246,7 +248,11 @@ fun ConsumptionDetailsScreen(
 
                     // 2) Startdruck – Verbrauch = Restdruck
                     Text(
-                        text = "${fmt0(startBar)} bar − ${fmt0(usedBarExact)} bar = ${fmt0(remainingBar)} bar",
+                        text = "${fmt0(startBar)} bar − ${fmt0(usedBarExact)} bar = ${
+                            fmt0(
+                                remainingBar
+                            )
+                        } bar",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray,
                         fontFamily = FontFamily.Monospace
