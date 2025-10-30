@@ -3,7 +3,9 @@ package com.example.ptt.domain
 import com.example.ptt.domain.calc.moveGasLiters
 import com.example.ptt.domain.calc.*
 import com.example.ptt.domain.model.ConsumptionModel
-import com.example.ptt.domain.model.SettingsSnapshot
+import java.math.BigDecimal
+import java.math.RoundingMode
+
 
 object ConsumptionCalculator {
 
@@ -37,7 +39,8 @@ object ConsumptionCalculator {
     )
 
     fun summarize(model: ConsumptionModel): ConsumptionSummary {
-        val usedL = computeUsedLiters(model.levels, model.settings)
+        val usedLExact = computeUsedLiters(model.levels, model.settings)
+        val usedL = roundLiters(usedLExact).toDouble()  // Rundung
         val usedBar = usedL / model.settings.cylinderVolumeL
         val remainingBar = model.startBar - usedBar
         return ConsumptionSummary(usedL, usedBar, remainingBar)
@@ -75,7 +78,7 @@ object ConsumptionCalculator {
                 legs += Leg.LevelLeg(
                     depthM = lvl.depthM,
                     minutes = netMin,
-                    gasL = levelGas,
+                    gasL = roundLiters(levelGas).toDouble(),
                     ata = levelAta
                 )
             }
@@ -85,5 +88,10 @@ object ConsumptionCalculator {
         val summary = summarize(model)
         return ConsumptionDetails(legs = legs, summary = summary)
     }
+
+    // Rundungs-Helper
+    fun roundLiters(x: Double): Int =
+        BigDecimal(x).setScale(0, RoundingMode.HALF_UP).toInt()
+
 
 }
