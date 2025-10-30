@@ -224,7 +224,7 @@ fun ConsumptionDetailsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Remaining bar:", style = MaterialTheme.typography.titleMedium)
+                        Text("Remaining pressure:", style = MaterialTheme.typography.titleMedium)
                         Text(
                             "${fmt0(remainingBar)} bar",
                             style = MaterialTheme.typography.titleMedium

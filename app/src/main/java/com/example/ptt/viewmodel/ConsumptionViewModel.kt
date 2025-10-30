@@ -48,7 +48,6 @@ class ConsumptionViewModel : ViewModel() {   // erbt von ViewModel
         lastBuiltModel = model
     }
 
-
     // Wird benötigt, um die Stringwerte zu Parsen
     fun buildConsumptionModelOrNull(): ConsumptionModel? {
         val snap = settingsSnapshot ?: return null
@@ -81,6 +80,12 @@ class ConsumptionViewModel : ViewModel() {   // erbt von ViewModel
         )
     }
 
+    // Berechnet die Nettozeit des eingegebenen Levels
+    private fun netLevelMinutes(fromM: Double, toM: Double, inputMinutes: Double, s: SettingsSnapshot
+    ): Double {
+        val (_, moveTime) = moveGasLiters(fromM, toM, s)
+        return (inputMinutes - moveTime).coerceAtLeast(0.0)
+    }
 
     // Prüft, ob ein weiterer Level (inkl. Move) noch bis rbBar passt
     sealed class Fit {
@@ -92,23 +97,28 @@ class ConsumptionViewModel : ViewModel() {   // erbt von ViewModel
         val s = settingsSnapshot ?: return Fit.Rejected
         val start = fillingPressureBar.toDoubleOrNullDe() ?: return Fit.Rejected
         if (start <= 0.0) return Fit.Rejected
-        if (depthM < 0.0 || durationMin <= 0.0) return Fit.Rejected
+        if (depthM < 0.0 || durationMin < 0.0) return Fit.Rejected  // 0 ist erlaubt
 
         // Bisheriger Verbrauch
         val usedSoFarL = computeUsedLiters(levels, s)
         val remainingL = start * s.cylinderVolumeL - usedSoFarL
         if (remainingL < 0.0) return Fit.Rejected
 
-
-
-// Move (Domain-Helper)
+        // Move
         val lastDepth = levels.lastOrNull()?.depthM ?: 0.0
-        val (moveL, timeMove) = moveGasLiters(lastDepth, depthM, s)
-        // Level-Verbrauch am Ziel
-        val levelL = s.sacLpm * (1.0 + depthM / 10.0) * durationMin
+        val (moveL, /* timeMove */) = moveGasLiters(lastDepth, depthM, s)
 
-        return if (moveL + levelL <= remainingL + 1e-9) Fit.Full else Fit.Rejected // Puffer (0,00000000001) gegen Double-Zickereien
+        // Netto-Levelzeit (Eingabe minus Move-Zeit, nie < 0)
+        val netMin = netLevelMinutes(lastDepth, depthM, durationMin, s)
+
+        // Level-Verbrauch mit NETTO-Minuten
+        val levelGasNet = s.sacLpm * (1.0 + depthM / 10.0) * netMin
+
+        // Puffer (0,00000000001) gegen Double-Zickereien
+        val epsilon = 1e-9
+        return if (moveL + levelGasNet <= remainingL + epsilon) Fit.Full else Fit.Rejected
     }
+
 
     // Im ConsumptionViewModel (nutzt Domain-Typen + computeUsedLiters aus der Domain)
     fun canAddLevelAt(index: Int, depthM: Double, minutes: Double): Fit {
@@ -117,7 +127,7 @@ class ConsumptionViewModel : ViewModel() {   // erbt von ViewModel
 
         // Guards
         if (start <= 0.0) return Fit.Rejected
-        if (depthM < 0.0 || minutes <= 0.0) return Fit.Rejected
+        if (depthM < 0.0 || minutes < 0.0) return Fit.Rejected
 
         // Außerhalb der Liste? → wie "Anhängen"
         if (index < 0 || index > levels.size) {
@@ -126,11 +136,12 @@ class ConsumptionViewModel : ViewModel() {   // erbt von ViewModel
 
         // 1) Verbrauch bis vor index (0..index-1)
         val prior: List<Level> = levels.take(index)
+        val lastDepthBefore = prior.lastOrNull()?.depthM ?: 0.0
 
         // 2) Kandidat an Position index einsetzen
         val candidateList: List<Level> = buildList {
             addAll(prior)
-            add(Level(depthM, minutes))
+            add(Level(depthM,minutes))  // Brutto
         }
 
         // 3) Verbrauch dieser Teil-Liste
@@ -143,9 +154,12 @@ class ConsumptionViewModel : ViewModel() {   // erbt von ViewModel
 
     fun addLevel(depthM: Double, durationMin: Double) {
         when (canAddAnotherLevel(depthM, durationMin)) {
-            Fit.Full -> levels += Level(depthM, durationMin)
-            Fit.Rejected -> { /* UI markiert rot */
+            Fit.Full -> {
+                val s = settingsSnapshot ?: return
+                val lastDepth = levels.lastOrNull()?.depthM ?: 0.0
+                levels += Level(depthM, durationMin)   // Brutto anzeigen
             }
+            Fit.Rejected -> { /* UI markiert rot */ }
         }
     }
 

@@ -56,7 +56,6 @@ object ConsumptionCalculator {
             val (moveGas, moveTime) = moveGasLiters(last, lvl.depthM, s)
             if (moveTime > 0.0 || moveGas > 0.0) {
                 val avgAta = ata((last + lvl.depthM) / 2.0)
-                val rate   = if (lvl.depthM < last) s.ascentRateMpm else s.descentRateMpm
 
                 legs += Leg.MoveLeg(
                     fromM = last,
@@ -68,16 +67,18 @@ object ConsumptionCalculator {
                 )
             }
 
-            // Level
-            val levelAta = ata(lvl.depthM)
-            val levelGas = s.sacLpm * levelAta * lvl.durationMin
-            legs += Leg.LevelLeg(
-                depthM = lvl.depthM,
-                minutes = lvl.durationMin,
-                gasL = levelGas,
-                ata = levelAta
-            )
+            val netMin = (lvl.durationMin - moveTime).coerceAtLeast(0.0) // NETTO
 
+            if (netMin> 0.0) {  //  // Level nur anzeigen, wenn minutes > 0
+                val levelAta = ata(lvl.depthM)
+                val levelGas = s.sacLpm * levelAta * netMin
+                legs += Leg.LevelLeg(
+                    depthM = lvl.depthM,
+                    minutes = netMin,
+                    gasL = levelGas,
+                    ata = levelAta
+                )
+            }
             last = lvl.depthM
         }
 

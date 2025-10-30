@@ -14,13 +14,23 @@ fun ata(depthM: Double) = 1.0 + depthM / 10.0
     return gas to time
 }
 
+// Domain-Helfer: netto-Zeit aus Tiefe, Zieltiefe und Eingabezeit
+fun netLevelMinutes(fromM: Double, toM: Double, inputMinutes: Double, s: SettingsSnapshot): Double {
+    val (_, moveTime) = moveGasLiters(fromM, toM, s)
+    return (inputMinutes - moveTime).coerceAtLeast(0.0)
+}
+
+// Verbrauchsberechnung nutzt den Helper
 fun computeUsedLiters(levels: List<Level>, s: SettingsSnapshot): Double {
     var used = 0.0
     var last = 0.0
     for (l in levels) {
         val (moveGas, _) = moveGasLiters(last, l.depthM, s)
         used += moveGas
-        used += s.sacLpm * ata(l.depthM) * l.durationMin
+
+        val netMin = netLevelMinutes(last, l.depthM, l.durationMin, s) // einmaliger Helper-Call
+        used += s.sacLpm * ata(l.depthM) * netMin
+
         last = l.depthM
     }
     return used
