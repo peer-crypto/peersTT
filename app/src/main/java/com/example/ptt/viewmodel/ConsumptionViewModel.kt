@@ -48,7 +48,7 @@ class ConsumptionViewModel : ViewModel() {   // erbt von ViewModel
         lastBuiltModel = model
     }
 
-    // Wird benötigt, um die Stringwerte zu Parsen
+    // Stringwerte parsen
     fun buildConsumptionModelOrNull(): ConsumptionModel? {
         val snap = settingsSnapshot ?: return null
         val start = fillingPressureBar.toDoubleOrNullDe() ?: return null
@@ -119,38 +119,6 @@ class ConsumptionViewModel : ViewModel() {   // erbt von ViewModel
         return if (moveL + levelGasNet <= remainingL + epsilon) Fit.Full else Fit.Rejected
     }
 
-
-    // Im ConsumptionViewModel (nutzt Domain-Typen + computeUsedLiters aus der Domain)
-    fun canAddLevelAt(index: Int, depthM: Double, minutes: Double): Fit {
-        val s = settingsSnapshot ?: return Fit.Rejected
-        val start = fillingPressureBar.toDoubleOrNullDe() ?: return Fit.Rejected
-
-        // Guards
-        if (start <= 0.0) return Fit.Rejected
-        if (depthM < 0.0 || minutes < 0.0) return Fit.Rejected
-
-        // Außerhalb der Liste? → wie "Anhängen"
-        if (index < 0 || index > levels.size) {
-            return canAddAnotherLevel(depthM, minutes)
-        }
-
-        // 1) Verbrauch bis vor index (0..index-1)
-        val prior: List<Level> = levels.take(index)
-        val lastDepthBefore = prior.lastOrNull()?.depthM ?: 0.0
-
-        // 2) Kandidat an Position index einsetzen
-        val candidateList: List<Level> = buildList {
-            addAll(prior)
-            add(Level(depthM,minutes))  // Brutto
-        }
-
-        // 3) Verbrauch dieser Teil-Liste
-        val usedLiters = computeUsedLiters(candidateList, s)
-        val usedBar = usedLiters / s.cylinderVolumeL
-        val remainingBar = start - usedBar
-
-        return if (remainingBar >= 0.0) Fit.Full else Fit.Rejected
-    }
 
     fun addLevel(depthM: Double, durationMin: Double) {
         when (canAddAnotherLevel(depthM, durationMin)) {

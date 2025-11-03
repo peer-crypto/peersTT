@@ -64,7 +64,7 @@ object ConsumptionCalculator {
                     fromM = last,
                     toM = lvl.depthM,
                     timeMin = moveTime,
-                    gasL = moveGas,
+                    gasL = roundLiters(moveGas).toDouble(),
                     avgAta = avgAta
 
                 )
