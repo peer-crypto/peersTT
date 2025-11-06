@@ -103,23 +103,28 @@ fun HeJumpDetailsScreen(
         Spacer(Modifier.height(16.dp))
 
         // --- 1/5-Regel, mit eingesetzten Zahlen ---
-        val lhs = abs(result.deltaN2)                // |ΔN2|
+        val lhs = abs(result.deltaN2)                // |ΔN₂|
         val rhs = 0.2 * abs(result.deltaHe)          // 0.2 * |ΔHe|
         SectionTitle("One-fifth rule")
+
+// Beispiel: 3 pp ≤ 0.2 × 17 pp = 3.4 pp
+        val lhsStr = "%.1f".format(lhs * 100)
+        val heStr = "%.1f".format(abs(result.deltaHe) * 100)
+        val rhsStr = "%.1f".format(rhs * 100)
+
         Text(
-            "|ΔN₂| ≤ 0.2 × |ΔHe|",
+            "$lhsStr pp ≤ 0.2 × $heStr pp = $rhsStr pp",
             style = MaterialTheme.typography.bodyMedium,
             fontFamily = FontFamily.Monospace
         )
+
+        // Bewertung
         Text(
-            // Beispiel: |3 pp| ≤ 0.2 × |7 pp|
-            "${pp(lhs)} ≤ 0.2 × ${pp(abs(result.deltaHe))}",
-            style = MaterialTheme.typography.bodyMedium,
-            fontFamily = FontFamily.Monospace
-        )
-        Text(
-            if (result.withinOneFifthRule) "→ satisfied" else "→ violated",
-            color = if (result.withinOneFifthRule) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+            if (result.withinOneFifthRule) "✓ satisfied" else "✗ violated",
+            color = if (result.withinOneFifthRule)
+                MaterialTheme.colorScheme.primary
+            else
+                MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.bodyMedium,
             fontFamily = FontFamily.Monospace
         )
