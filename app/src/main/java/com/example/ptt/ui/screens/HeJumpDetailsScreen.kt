@@ -155,14 +155,20 @@ fun HeJumpDetailsScreen(
                 Spacer(Modifier.height(8.dp))
                 val recO2 = (rec.fO2 * 100.0).roundToInt()
                 val recHe = (rec.fHe * 100.0).roundToInt()
+
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                )
+                {
                 Button(
                     onClick = { apply(recO2, recHe) },
-                    modifier = Modifier.fillMaxWidth()
-                ) { Text("Apply suggestion ($recO2% O₂ / $recHe% He)") }
+                    modifier = Modifier.wrapContentWidth()
+                ) { Text("Apply suggestion ") }
             }
         }
     }
-}
+}}
 
 @Composable
 private fun SectionTitle(title: String) {

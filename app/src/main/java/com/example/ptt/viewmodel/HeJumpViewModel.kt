@@ -26,6 +26,22 @@ class HeJumpViewModel : ViewModel() {
     // Neu: zeigt an, dass Eingaben geändert wurden und neu berechnet werden muss
     var needsRecalc by mutableStateOf(true);          private set
 
+
+    // needsRecalc bleibt true → User drückt später Calculate
+    fun applyToMix(o2Pct: Int, hePct: Int) {
+        updateTo(o2Pct = o2Pct.toString(), hePct = hePct.toString())
+
+    }
+
+
+    // needsRecalc bleibt true → User drückt später Calculate
+    fun applyToMixAndCalculate(o2Pct: Int, hePct: Int) {
+        updateTo(o2Pct = o2Pct.toString(), hePct = hePct.toString())
+        calculate()          // direkt rechnen (du willst ja sofort das Ergebnis)
+    }
+
+
+
     fun updateFrom(o2Pct: String? = null, hePct: String? = null) {
         o2Pct?.let { fromO2Pct = it }
         hePct?.let { fromHePct = it }
