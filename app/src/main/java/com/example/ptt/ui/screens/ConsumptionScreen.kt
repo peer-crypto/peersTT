@@ -62,7 +62,7 @@ fun ConsumptionScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextButton(onClick = onBack) { Text("‹ Back") }
-            Text("Consumption-Calculator", style = MaterialTheme.typography.titleMedium)
+            Text("Consumption-Calculator", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.width(48.dp))
         }
 

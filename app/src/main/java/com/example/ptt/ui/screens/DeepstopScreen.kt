@@ -5,7 +5,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -55,7 +54,7 @@ fun DeepstopScreen(onBack: () -> Unit, vm: DeepstopViewModel = viewModel()) {
 
         Text("Deepstop: ${result.deepstop} m", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(8.dp))
-        Text("Powered by Tom's Theorem:", style = MaterialTheme.typography.bodySmall)
+        Text("Powered by Tom's Theorem 😊:", style = MaterialTheme.typography.bodySmall)
         Text("max pressure ÷ 1.35 = stop pressure", style = MaterialTheme.typography.bodySmall)
     }
 }

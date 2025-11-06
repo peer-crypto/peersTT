@@ -16,6 +16,7 @@ fun HomeScreen(
     onDeepstop: () -> Unit,
     onConsumption: () -> Unit,
     onRockbottom: () -> Unit,
+    onHeJump: () -> Unit,
     onSettings: () -> Unit
 
 ) {
@@ -51,6 +52,14 @@ fun HomeScreen(
             onClick = onRockbottom,
             modifier = Modifier.width(240.dp).height(56.dp)
         ) { Text("Rockbottom Calculator") }
+
+
+        Spacer(Modifier.height(16.dp))
+
+        OutlinedButton(
+            onClick = onHeJump,
+            modifier = Modifier.width(240.dp).height(56.dp)
+        ) { Text("He-Jump Calculator") }
 
 
         Spacer(modifier = Modifier.weight(1f))   //  schiebt Button nach unten

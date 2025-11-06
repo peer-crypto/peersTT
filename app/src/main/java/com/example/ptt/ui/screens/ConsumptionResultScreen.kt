@@ -110,7 +110,7 @@ fun ConsumptionResultScreen(
                     onClick = onShowDetails,
                     enabled = modelExists,
                 ) {
-                    Text("Details anzeigen")
+                    Text("Show details")
                 }
 
             }

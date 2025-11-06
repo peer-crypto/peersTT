@@ -1,11 +1,13 @@
 package com.example.ptt.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.ptt.ui.screens.*
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.ptt.viewmodel.HeJumpViewModel
 
 
 sealed class Route(val path: String) {
@@ -19,17 +21,25 @@ sealed class Route(val path: String) {
     data object ConsumptionResult : Route("consumption_result")
 
     data object ConsumptionDetails : Route("consumption_details")
+
+    data object HeJump: Route("hejump")
+
+    data object HeJumpDetails : Route("hejump_details")
+
     data object Settings : Route("settings")
 }
 
 @Composable
 fun AppNavGraph(nav: NavHostController) {
+
     NavHost(navController = nav, startDestination = Route.Home.path) {
+
         composable(Route.Home.path) {
             HomeScreen(
                 onDeepstop = { nav.navigate(Route.Deepstop.path) },
                 onConsumption = { nav.navigate(Route.Consumption.path) },
                 onRockbottom = { nav.navigate(Route.Rockbottom.path) },
+                onHeJump = { nav.navigate(Route.HeJump.path) },
                 onSettings = { nav.navigate(Route.Settings.path) }
             )
         }
@@ -93,5 +103,28 @@ fun AppNavGraph(nav: NavHostController) {
             )
         }
 
+        composable(Route.HeJump.path) { backStackEntry ->
+            val vm: com.example.ptt.viewmodel.HeJumpViewModel =
+                viewModel(backStackEntry)
+                HeJumpScreen(
+                vm = vm,
+                onBack = { nav.popBackStack() },
+                onShowDetails = { nav.navigate(Route.HeJumpDetails.path) },
+            )
+        }
+
+        // Details soll dieselbe VM-Instanz sehen: über das HeJump-BackStackEntry scopen
+        composable(Route.HeJumpDetails.path) { backStackEntry ->
+            // Hole das Parent-Entry für "hejump"
+            val parentEntry = remember(backStackEntry) {
+                nav.getBackStackEntry(Route.HeJump.path)
+            }
+            val vm: HeJumpViewModel = viewModel(parentEntry)
+
+            HeJumpDetailsScreen(
+                onBack = { nav.popBackStack() },
+                result = vm.buildDetailsPayload()
+            )
+        }
     }
 }

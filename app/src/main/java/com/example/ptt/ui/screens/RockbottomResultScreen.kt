@@ -77,7 +77,7 @@ fun RockbottomResultScreen(
                 onClick = { nav.navigate(Route.RockbottomDetails.path) },
                 modifier = Modifier.align(Alignment.End)
             ) {
-                Text("Details anzeigen")
+                Text("Show details")
             }
         } else {
             Text(
