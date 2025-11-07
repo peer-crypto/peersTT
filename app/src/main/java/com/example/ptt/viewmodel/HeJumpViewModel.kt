@@ -11,7 +11,7 @@ import com.example.ptt.domain.HeJumpCalculator
 
 class HeJumpViewModel : ViewModel() {
 
-    var fromO2Pct by mutableStateOf("21"); private set
+    var fromO2Pct by mutableStateOf("18"); private set
     var fromHePct by mutableStateOf("35"); private set
     var toO2Pct   by mutableStateOf("50"); private set
     var toHePct   by mutableStateOf("0");  private set

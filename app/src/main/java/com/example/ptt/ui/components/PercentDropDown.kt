@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
+
 fun PercentDropdownColumn(
     label: String,
     valuePct: Int,
@@ -21,7 +22,7 @@ fun PercentDropdownColumn(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.width(200.dp), // gleiche Breite wie dein DepthDropdown
+        modifier = modifier.width(200.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(label, style = MaterialTheme.typography.labelSmall)
@@ -31,9 +32,7 @@ fun PercentDropdownColumn(
             options = options,
             selected = valuePct,
             onSelected = onChange,
-            modifier = Modifier.height(60.dp) // passt zu deinem Button in DepthDropdown
+            modifier = Modifier.height(60.dp)
         )
     }
 }
-
-

@@ -24,25 +24,26 @@ fun CompactNumberField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     placeholder: String? = null,
+    isError: Boolean = false
 ) {
     val shape = RoundedCornerShape(8.dp)
+    val borderColor = if (isError) MaterialTheme.colorScheme.error
+    else MaterialTheme.colorScheme.outline
 
     Box(
         modifier
             .height(40.dp)
             .width(70.dp)
-            .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline), shape)
+            .border(BorderStroke(1.dp, borderColor), shape)
             .padding(horizontal = 6.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
     ) {
         BasicTextField(
             value = value,
             onValueChange = { input ->
-                // 🔹 Nur Ziffern, Komma oder Punkt erlauben
                 val allowed = input.isEmpty() || input.all { c ->
                     c.isDigit() || c == ',' || c == '.'
                 }
-
                 if (allowed) onValueChange(input)
             },
             singleLine = true,
