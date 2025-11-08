@@ -1,6 +1,6 @@
 package com.example.ptt.ui.screens
 
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import android.R.attr.horizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.material3.*
 import androidx.compose.foundation.layout.*
@@ -10,14 +10,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import androidx.compose.ui.unit.sp
 import com.example.ptt.domain.settings.SettingsRepository
 import com.example.ptt.ui.components.CompactNumberField
-
-
-
-
 
 @Composable
 fun SettingsScreen(
@@ -98,11 +95,33 @@ fun SettingsScreen(
         Button(
             onClick = { focus.clearFocus(); onBack() },
             modifier = Modifier.width(120.dp).height(48.dp),
-                    colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF0072C5),
-            contentColor = Color.White
-        ),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF0072C5),
+                contentColor = Color.White
+            ),
         ) { Text("Done") }
+
+        Spacer(Modifier.weight(1f))
+
+        HorizontalDivider()
+
+        SectionTitle("About / Disclaimer")
+
+        Text(
+            "Developed by Peer Röhl (pub@peerroehl.net).\n\n" +
+                    "All calculations are provided without warranty.\n" +
+                    "Use at your own risk — this app is not a substitute\n" +
+                    "for proper dive planning or training.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            lineHeight = 20.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp)
+        )
+
+
     }
 }
 
