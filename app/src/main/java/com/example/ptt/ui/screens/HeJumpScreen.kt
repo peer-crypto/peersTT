@@ -10,7 +10,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.ptt.domain.model.HeJumpViolation
 import com.example.ptt.viewmodel.HeJumpViewModel
-import com.example.ptt.ui.components.HeJumpGasPickerManual
+import com.example.ptt.ui.components.HeJumpGasPicker
 
 @Composable
 fun HeJumpScreen(
@@ -56,7 +56,7 @@ fun HeJumpScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        HeJumpGasPickerManual(
+        HeJumpGasPicker(
             title = "From Gas",
             o2PctStr = vm.fromO2Pct,
             hePctStr = vm.fromHePct,
@@ -66,7 +66,7 @@ fun HeJumpScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        HeJumpGasPickerManual(
+        HeJumpGasPicker(
             title = "To Gas",
             o2PctStr = vm.toO2Pct,
             hePctStr = vm.toHePct,

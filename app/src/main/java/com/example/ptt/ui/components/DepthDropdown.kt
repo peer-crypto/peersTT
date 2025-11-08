@@ -36,24 +36,19 @@ fun <T> DepthDropdown(
             Text(labelBuilder(selected) + " ▾", fontSize = 25.sp)
         }
 
-        // 👇 Hier kommt der neue Modifier rein
         DropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.heightIn(max = 300.dp)
+            onDismissRequest = { expanded = false }
         ) {
-            Column(Modifier.verticalScroll(rememberScrollState())) {
-                options.forEach { value ->
-                    DropdownMenuItem(
-                        text = { Text(labelBuilder(value)) },
-                        onClick = {
-                            onSelected(value)
-                            expanded = false
-                        }
-                    )
-                }
+            options.forEach { value ->
+                DropdownMenuItem(
+                    text = { Text(labelBuilder(value)) },
+                    onClick = {
+                        onSelected(value)
+                        expanded = false
+                    }
+                )
             }
         }
-
     }
 }

@@ -8,6 +8,7 @@ import com.example.ptt.ui.input.toDoubleOrNullDe
 import com.example.ptt.domain.model.GasMix
 import com.example.ptt.domain.model.HeJumpResult
 import com.example.ptt.domain.HeJumpCalculator
+import com.example.ptt.domain.model.Recommendation
 
 class HeJumpViewModel : ViewModel() {
 
@@ -19,12 +20,15 @@ class HeJumpViewModel : ViewModel() {
     val fromN2Pct: String get() = pctClamp(100.0 - (fromO2Pct.toDoubleOrNullDe() ?: 0.0) - (fromHePct.toDoubleOrNullDe() ?: 0.0))
     val toN2Pct:   String get() = pctClamp(100.0 - (toO2Pct.toDoubleOrNullDe() ?: 0.0) - (toHePct.toDoubleOrNullDe() ?: 0.0))
 
+
     var result: HeJumpResult? by mutableStateOf(null); private set
     var isValid by mutableStateOf(false);             private set
     var errorMsg by mutableStateOf<String?>(null);    private set
 
     // Neu: zeigt an, dass Eingaben geändert wurden und neu berechnet werden muss
     var needsRecalc by mutableStateOf(true);          private set
+
+    var altRec  by mutableStateOf<Recommendation?>(null)
 
 
     // needsRecalc bleibt true → User drückt später Calculate
@@ -67,12 +71,14 @@ class HeJumpViewModel : ViewModel() {
         result = null
         isValid = false
         errorMsg = null
+        altRec = null
     }
 
     private fun recompute() {
         errorMsg = null
         isValid = false
         result = null
+        altRec = null
 
         val fO2_from_pct = fromO2Pct.toDoubleOrNullDe()
         val fHe_from_pct = fromHePct.toDoubleOrNullDe()
@@ -101,11 +107,17 @@ class HeJumpViewModel : ViewModel() {
             errorMsg = "Gasmix ungültig (negative Anteile oder O₂+He > 1)."
             return
         }
-
+        // Hauptprüfung
         result = HeJumpCalculator.checkOC(from, to)
+
+        // Alternative (Intermediate/Standardmixe) – immer parallel berechnen
+        altRec = HeJumpCalculator.recommendIntermediate(from, to)
+
         isValid = true
     }
 
     private fun inRangePct(x: Double) = x in 0.0..100.0
     private fun pctClamp(x: Double): String = x.coerceIn(0.0, 100.0).toInt().toString()
+
+
 }

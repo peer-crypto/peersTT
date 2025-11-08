@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun HeJumpGasPickerManual(
+fun HeJumpGasPicker(
     title: String,
     o2PctStr: String,
     hePctStr: String,

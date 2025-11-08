@@ -113,20 +113,23 @@ fun AppNavGraph(nav: NavHostController) {
             )
         }
 
-        // Details soll dieselbe VM-Instanz sehen: über das HeJump-BackStackEntry scopen
+        // Details sieht dieselbe VM-Instanz: über das HeJump-BackStackEntry scopen
         composable(Route.HeJumpDetails.path) { backStackEntry ->
             val parentEntry = remember(backStackEntry) { nav.getBackStackEntry(Route.HeJump.path) }
             val vm: HeJumpViewModel = viewModel(parentEntry)
 
             HeJumpDetailsScreen(
                 onBack = { nav.popBackStack() },
-                result = vm.buildDetailsPayload(),
+                // wenn du buildDetailsPayload() hast:
+                result = vm.result,            // oder: result = vm.buildDetailsPayload()
+                altRec = vm.altRec,            // 👈 NEU: Alternative reinschieben
                 onApplyRecommendation = { o2Pct, hePct ->
-                    vm.applyToMixAndCalculate(o2Pct, hePct) // Werte setzen + rechnen
-                    nav.popBackStack()                      // zurück in den HeJumpScreen
+                    vm.applyToMixAndCalculate(o2Pct, hePct)
+                    nav.popBackStack() // zurück in den HeJumpScreen
                 }
             )
         }
+
 
     }
 }
