@@ -109,6 +109,8 @@ fun HeJumpDetailsScreen(
         )
 
         Spacer(Modifier.height(16.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(16.dp))
 
 // Flags
         val directOk = result.withinOneFifthRule &&
@@ -133,17 +135,21 @@ fun HeJumpDetailsScreen(
                         onClick = { apply(recO2, recHe) },
                         modifier = Modifier.wrapContentWidth()
                     ) {
-                        Text("Apply & Calculate")
+                        Text("Apply")
+                        Spacer(Modifier.height(16.dp))
                     }
                 }
             }
         }
+
+
 
 // --- Alternative nur zeigen, wenn direkter Wechsel NICHT ok ist ---
         if (!directOk) {
             when (altRec) {
                 is Recommendation.TwoStep -> {
                     Spacer(Modifier.height(16.dp)); HorizontalDivider(); Spacer(Modifier.height(8.dp))
+                    HorizontalDivider()
                     SectionTitle("Alternative (intermediate path)")
                     Text("Two-step suggestion:", style = MaterialTheme.typography.bodyMedium)
                     KeyValueRow("Step 1 – Intermediate O₂", pct(altRec.first.fO2))
@@ -154,7 +160,8 @@ fun HeJumpDetailsScreen(
 
                 Recommendation.NoFeasible, null -> {
                     Spacer(Modifier.height(12.dp))
-                    Text("No suggestion feasible.", color = MaterialTheme.colorScheme.error)
+                    HorizontalDivider()
+                    Text("No suggestion feasible (beta)", color = MaterialTheme.colorScheme.error)
                 }
                 // (Single tritt hier praktisch nicht auf, weil dann directOk true wäre)
                 is Recommendation.Single -> { /* no-op */
